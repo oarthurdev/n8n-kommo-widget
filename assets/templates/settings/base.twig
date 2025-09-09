@@ -52,7 +52,11 @@
       </div>
       <div class="widget_settings_block__item_field__input">
         <div style="display: flex; gap: 10px; align-items: center;">
-          {{ agents_select }}
+          <select id="kommo-n8n-agents-select" name="params[selected_agent]">
+            {% for agent in params.available_agents %}
+              <option value="{{ agent.id }}">{{ agent.option }}</option>
+            {% endfor %}
+          </select>
           {{ load_agents_button }}
         </div>
       </div>

@@ -45,6 +45,16 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
             // Persiste normalizado para re-renderizações futuras
             _this.showNotification(`Agentes carregados com sucesso! ${items.length} agente(s) encontrado(s).`, "success");
             _this.widget.info.params.available_agents = items;
+            if (!_this.widget.params) {
+              _this.widget.params = {};
+            }
+            _this.widget.params.available_agents = items;
+
+            // NÃO atualize o DOM manualmente!
+            // Apenas recarregue o bloco de settings:
+            if (_this.widget.settings && typeof _this.widget.settings.load === "function") {
+              _this.widget.settings.load();
+            }
           })
           .catch(function(error) {
             let errorMsg = "Falha ao carregar agentes. ";

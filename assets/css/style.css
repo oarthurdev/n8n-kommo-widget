@@ -207,3 +207,51 @@
 .kommo-settings__content__title .kommo-n8n__badge {
   margin-left: 5px;
 }
+
+#kommo-n8n-agents-select {
+  width: 250px;
+  padding: 8px 12px;
+  border: 1px solid #2b3a4b;
+  border-radius: 6px;
+  background: #1a2332;
+  color: #fff;
+  font-size: 15px;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+#kommo-n8n-agents-select:focus {
+  border-color: #4f8cff;
+  box-shadow: 0 0 0 2px rgba(79,140,255,0.15);
+}
+
+#kommo-n8n-agents-select option {
+  background: #232f47;
+  color: #fff;
+  font-size: 15px;
+  padding: 8px 12px;
+}
+
+/* Ajuste para o container do select */
+.widget_settings_block__item_field--select .widget_settings_block__item_field__input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Botão de carregar agentes ao lado do select */
+#kommo-n8n-load-agents {
+  background: #4f8cff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#kommo-n8n-load-agents:hover {
+  background: #3570c9;
+}
