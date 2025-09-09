@@ -38,7 +38,6 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
               agents.forEach(function(agent) {
                 $select.append(`<option value="${agent.id}">${agent.name}</option>`);
               });
-              
               // Store agents in widget params for later use
               _this.widget.info.params.available_agents = agents;
               
@@ -54,106 +53,6 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
           .finally(function() {
             $button.prop("disabled", false).text("Carregar Agentes");
           });
-      });
-
-      // Generate template button handler
-      $(document).on("click", "#kommo-n8n-generate-template", function(e) {
-        e.preventDefault();
-        
-        const config = {
-          webhook_url: $("#kommo-n8n-webhook-url").val().trim(),
-          openai_key: $("#kommo-n8n-openai-key").val().trim(),
-          selected_agent: $("#kommo-n8n-agents-select").val()
-        };
-
-        if (!config.webhook_url || !config.openai_key || !config.selected_agent) {
-          _this.showNotification("Preencha todos os campos obrigatórios", "error");
-          return;
-        }
-
-        try {
-          const template = _this.widget.kommo.generateSalesbotTemplate(config);
-          const templateJson = JSON.stringify(template, null, 2);
-          
-          // Download the template
-          _this.widget.kommo.downloadFile('salesbot_template.json', templateJson);
-          _this.showTemplateResult(true, "Template gerado e baixado com sucesso!");
-        } catch (error) {
-          console.error("Error generating template:", error);
-          _this.showTemplateResult(false, "Erro ao gerar template: " + error.message);
-        }
-      });
-
-       _this.widget.kommo.loadOpenAIAgents(apiKey)
-          .then(function(agents) {
-            // Normaliza pro formato que o select.twig entende
-            const items = [{ id: "", option: "Selecione..." }].concat(
-              (agents || [])
-                .filter(a => a.id != null)
-                .map(a => ({ id: String(a.id), option: a.name || `Agente ${a.id}` }))
-            );
-            // Atualiza o SELECT no DOM (imediato)
-            const $select = $("#kommo-n8n-agents-select");
-            $select.empty().append('<option value="">Selecione um agente...</option>');
-            items.forEach(it => {
-              const $option = $("<option>").val(it.id).text(it.option);
-              $select.append($option);
-            });
-
-            // Persiste normalizado para re-renderizações futuras
-            _this.showNotification(`Agentes carregados com sucesso! ${items.length} agente(s) encontrado(s).`, "success");
-            _this.widget.info.params.available_agents = items;
-            if (!_this.widget.params) {
-              _this.widget.params = {};
-            }
-            _this.widget.params.available_agents = items;
-
-            // NÃO atualize o DOM manualmente!
-            // Apenas recarregue o bloco de settings:
-            if (_this.widget.settings && typeof _this.widget.settings.load === "function") {
-              _this.widget.settings.load();
-            }
-          })
-          .catch(function(error) {
-            let errorMsg = "Falha ao carregar agentes. ";
-            if (error && error.message) {
-              errorMsg += error.message;
-            } else {
-              errorMsg += "Verifique sua chave API OpenAI.";
-            }
-            _this.showNotification(errorMsg, "error");
-          })
-          .finally(function() {
-            // Use i18n or a variable for the button text to support localization
-            const buttonText = _this.widget.i18n ? _this.widget.i18n("settings.load_agents") : "Carregar Agentes";
-            $button.prop("disabled", false).text(buttonText);
-          });
-      });
-
-      // Generate template button handler
-      $("#kommo-n8n-generate-template").on("click", function() {
-        const config = {
-          webhook_url: $("#kommo-n8n-webhook-url").val(),
-          openai_key: $("#kommo-n8n-openai-key").val(),
-          selected_agent: $("#kommo-n8n-agents-select").val()
-        };
-
-        if (!config.webhook_url || !config.openai_key || !config.selected_agent) {
-          _this.showTemplateResult(false, "Please fill all required fields");
-          return;
-        }
-
-        try {
-          const template = _this.widget.kommo.generateSalesbotTemplate(config);
-          const templateJson = JSON.stringify(template, null, 2);
-
-          $("#kommo-n8n-template-json").val(templateJson);
-          $("#kommo-n8n-template-output").show();
-          _this.showTemplateResult(true, _this.widget.i18n("settings.template_generation.success"));
-        } catch (error) {
-          _this.showTemplateResult(false, _this.widget.i18n("settings.template_generation.error"));
-          console.error(error);
-        }
       });
 
       // Copy template button handler
@@ -195,39 +94,7 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
              .fadeIn(300);
     }
 
-    /**
-     * Show a non-blocking notification message
-     * @param {string} message - Notification message
-     * @param {string} type - Notification type: "success" or "error"
-     */
-    showNotification(message, type = "success") {
-      let $notif = $("#kommo-n8n-notification");
-      if ($notif.length === 0) {
-        $notif = $('<div id="kommo-n8n-notification"></div>').appendTo("body");
-        $notif.css({
-          position: "fixed",
-          top: "20px",
-          right: "20px",
-          zIndex: 9999,
-          minWidth: "220px",
-          padding: "12px 20px",
-          borderRadius: "6px",
-          fontSize: "15px",
-          color: "#fff",
-          display: "none"
-        });
-      }
-      $notif
-        .removeClass("success error")
-        .addClass(type)
-        .css("background", type === "success" ? "#28a745" : "#dc3545")
-        .text(message)
-        .fadeIn(200);
-
-      setTimeout(() => {
-        $notif.fadeOut(400);
-      }, 3000);
-    }
+    // (Removed duplicate showNotification method)
 
     /**
      * Show validation error
@@ -294,40 +161,15 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
     card() {
       const _this = this;
       const config = _this.widget.info.params || {};
-
-      // Check if chatbot is configured
-      if (!config.webhook_url || !config.agent_id) {
-        return;
-      }
-
-      // Set up automatic triggers based on configuration
-      _this.setupAutoTriggers(config);
+      // You can add card-specific logic here if needed
     }
 
     /**
-     * Set up automatic chatbot triggers
-     * @param {Object} config - Chatbot configuration
+     * Show a non-blocking notification message
+     * @param {string} message - Notification message
+     * @param {string} type - Notification type: "success" or "error"
      */
-    setupAutoTriggers(config) {
-      const _this = this;
-      const entityType = APP.widgets.system.area === 'lcard' ? 'leads' : 'contacts';
-      const entityId = APP.widgets.system.entity_id;
-
-      // Monitor for configured events
-      if (config.events && config.events.length > 0) {
-        config.events.forEach(function(eventType) {
-          _this.setupEventListener(eventType, entityType, entityId, config);
-        });
-      }
-    }
-
-    /**
-     * Set up event listener for specific event type
-     * @param {string} eventType - Type of event to listen for
-     * @param {string} entityType - Entity type (leads/contacts)
-     * @param {number} entityId - Entity ID
-     * @param {Object} config - Chatbot configuration
-     */
+    // (Removed duplicate showNotification method)
     setupEventListener(eventType, entityType, entityId, config) {
       const _this = this;
 
