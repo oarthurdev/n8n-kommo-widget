@@ -13,303 +13,190 @@ define(["./http.js"], function (Http) {
     getAccount() {
       return this.http.request(
         "/api/v4/account",
-        { with: "task_types" },
+        { with: "task_types,users" },
         "GET",
         {
-          cache: { key: "kbd_account", expires: 60 },
+          cache: { key: "n8n_account", expires: 60 },
           baseURL: window.location.origin,
         }
       );
     }
 
     /**
-     * Retrieve tasks based on a filter.
-     * @param {Object} filter - The filter criteria for tasks.
-     * @returns {Promise} - A promise that resolves with an array of tasks.
+     * Send data to n8n webhook
+     * @param {string} webhookUrl - The n8n webhook URL
+     * @param {Object} payload - Data to send to n8n
+     * @param {string} authToken - Authentication token
+     * @returns {Promise} - A promise that resolves with the webhook response
      */
-    getTasks(filter) {
-      return this.http
-        .request(
-          "/api/v4/tasks",
-          {
-            filter: filter,
-          },
-          "GET",
-          {
-            baseURL: window.location.origin,
-          }
-        )
-        .then(function (data) {
-          return ((data || {})._embedded || {}).tasks || [];
-        });
-    }
+    sendToN8nWebhook(webhookUrl, payload, authToken = null) {
+      let headers = {
+        'Content-Type': 'application/json'
+      };
 
-    /**
-     * Create a new task.
-     * @param {Object} payload - The task data to be created.
-     * @returns {Promise} - A promise that resolves with the created task.
-     */
-    createTask(payload) {
-      return this.http
-        .request("/api/v4/tasks", JSON.stringify([payload]), "POST", {
-          baseURL: window.location.origin,
-        })
-        .then(function (data) {
-          return ((data || {})._embedded || {}).tasks || [];
-        });
-    }
-
-    /**
-     * Create a new custom field for a specified entity type.
-     * @param {string} et - The entity type (e.g., 'leads', 'contacts').
-     * @param {Object} payload - The field data to be created.
-     * @returns {Promise} - A promise that resolves with the created custom field.
-     */
-    createField(et, payload) {
-      let _this = this;
-      return _this.http
-        .request(
-          "/api/v4/" + et + "/custom_fields",
-          JSON.stringify([payload]),
-          "POST",
-          {
-            baseURL: window.location.origin,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        )
-        .then(function (data) {
-          return (((data || {})._embedded || {}).custom_fields || [])[0] || {};
-        });
-    }
-
-    /**
-     * Create a new chat template.
-     * @param {Object} payload - The template data to be created.
-     * @returns {Promise} - A promise that resolves with the ID of the created template.
-     */
-    createTemplate(payload) {
-      return this.http
-        .request(
-          "/ajax/v1/chats/templates/add",
-          JSON.stringify({
-            request: payload,
-          }),
-          "POST",
-          {
-            baseURL: window.location.origin,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        )
-        .then(function (data) {
-          return (
-            ((((data || {}).response || {}).chats || {}).templates || {})
-              .added || 0
-          );
-        });
-    }
-
-    /**
-     * Retrieve chat templates with additional data.
-     * @returns {Promise} - A promise that resolves with an array of chat templates.
-     */
-    getTemplates() {
-      return this.http
-        .request(
-          "/ajax/v4/chats/templates",
-          {
-            with: "integration,reviews",
-            limit: 50,
-            page: 1,
-          },
-          "GET",
-          {
-            baseURL: window.location.origin,
-          }
-        )
-        .then(function (data) {
-          return ((data || {})._embedded || {}).chat_templates || {};
-        });
-    }
-
-    /**
-     * Retrieve users, paginated.
-     * @param {Array} [users=[]] - Accumulator for user data.
-     * @param {number} [page=1] - The page number to retrieve.
-     * @returns {Promise} - A promise that resolves with an array of users.
-     */
-    getUsers(users = [], page = 1) {
-      let _this = this;
-      return this.http
-        .request(
-          "/api/v4/users",
-          {
-            limit: 100,
-            page: page,
-          },
-          "GET",
-          {
-            baseURL: window.location.origin,
-          }
-        )
-        .then(function (data) {
-          return new Promise((resolve) => {
-            let tmp = ((data || {})._embedded || {}).users || [];
-            tmp.forEach(function (user) {
-              if (user.rights.is_active) {
-                users.push({
-                  id: user.id,
-                  option: user.name,
-                  name: user.name,
-                  is_admin: user.rights.is_admin,
-                });
-              }
-            });
-
-            if (data._page_count > 1 && data._page < data._page_count) {
-              // Fetch the next page if more pages are available
-              resolve(_this.getUsers(users, page + 1));
-            } else {
-              resolve(users);
-            }
-          });
-        });
-    }
-
-    /**
-     * Retrieve task types from the account information.
-     * @returns {Promise} - A promise that resolves with an array of task types.
-     */
-    getTaskTypes() {
-      return this.getAccount().then(function (account) {
-        let types = ((account || {})._embedded || {}).task_types || {};
-        types = Object.values(types).filter(function (item) {
-          item.option = item.name;
-          return item;
-        });
-        return types;
-      });
-    }
-
-    /**
-     * Retrieve custom fields for a specified entity type, paginated.
-     * @param {string} et - The entity type (e.g., 'leads', 'contacts').
-     * @param {number} [page=1] - The current page number to retrieve.
-     * @param {Array} [fields=[]] - Accumulator for custom fields.
-     * @returns {Promise} - A promise that resolves with an array of custom fields.
-     */
-    getFields(et, page = 1, fields = []) {
-      let _this = this;
-      return _this.http
-        .request(
-          "/api/v4/" + et + "/custom_fields",
-          {
-            page: page,
-          },
-          "GET",
-          {
-            baseURL: window.location.origin,
-          }
-        )
-        .then(function (data) {
-          let cf = ((data || {})._embedded || {}).custom_fields || [];
-          if (cf.length === 0) {
-            return fields;
-          }
-
-          fields = fields.concat(cf);
-          if (((data || {})._page_count || 0) > 1) {
-            page++;
-            return _this.getFields(et, page, fields);
-          } else {
-            return fields;
-          }
-        });
-    }
-
-    /**
-     * Returns an empty promise that resolves with an empty array.
-     * @returns {Promise} - A promise that resolves with an empty array.
-     */
-    getEmptyPromise() {
-      return new Promise(function (resolve) {
-        resolve([]);
-      });
-    }
-
-    /**
-     * Retrieve custom fields for specified entity types.
-     * @param {Array|string} fieldTypes - Field types to filter by.
-     * @param {Array|string|null} [entityType=null] - Entity types to retrieve fields for.
-     * @param {boolean} [addPostfix=false] - Whether to add a postfix to field names.
-     * @returns {Promise} - A promise that resolves with an array of custom fields.
-     */
-    getFieldsByType(fieldTypes, entityType = null, addPostfix = false) {
-      let _this = this;
-      let entityTypes = [];
-      if (entityType) {
-        entityTypes = !Array.isArray(entityType) ? [entityType] : entityType;
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
       }
 
-      return Promise.all([
-        $.inArray(APP.element_types.leads, entityTypes) >= 0
-          ? _this.getFields("leads")
-          : _this.getEmptyPromise(),
-        $.inArray(APP.element_types.contacts, entityTypes) >= 0
-          ? _this.getFields("contacts")
-          : _this.getEmptyPromise(),
-      ]).then(function ([leadFields, contactFields]) {
-        let fields = [];
-
-        if (!Array.isArray(fieldTypes)) {
-          fieldTypes = [fieldTypes];
+      return this.http.request(
+        "",
+        JSON.stringify(payload),
+        "POST",
+        {
+          baseURL: webhookUrl,
+          headers: headers
         }
+      );
+    }
 
-        entityTypes.forEach(function (et) {
-          let cf = {};
-          let postfix = "";
-          switch (et) {
-            case APP.element_types.contacts:
-              cf = contactFields;
-              postfix += " (" + _this.widget.i18n("settings.contact") + ")";
-              break;
-            case APP.element_types.leads:
-              cf = leadFields;
-              postfix += " (" + _this.widget.i18n("settings.lead") + ")";
-              break;
+    /**
+     * Test n8n webhook connection
+     * @param {string} webhookUrl - The n8n webhook URL
+     * @param {string} agentId - OpenAI agent ID
+     * @param {string} authToken - Authentication token
+     * @returns {Promise} - A promise that resolves with test results
+     */
+    testN8nConnection(webhookUrl, agentId, authToken = null) {
+      const testPayload = {
+        test: true,
+        agent_id: agentId,
+        message: "Test connection from Kommo",
+        timestamp: new Date().toISOString(),
+        source: "kommo_widget_test"
+      };
+
+      return this.sendToN8nWebhook(webhookUrl, testPayload, authToken);
+    }
+
+    /**
+     * Get current lead/contact data for chatbot processing
+     * @param {number} entityId - Entity ID
+     * @param {string} entityType - Entity type (leads/contacts)
+     * @returns {Promise} - A promise that resolves with entity data
+     */
+    getEntityData(entityId, entityType) {
+      const endpoint = `/api/v4/${entityType}/${entityId}`;
+      return this.http.request(
+        endpoint,
+        { with: "contacts,custom_fields,tasks,notes" },
+        "GET",
+        {
+          baseURL: window.location.origin,
+        }
+      );
+    }
+
+    /**
+     * Create a note from chatbot response
+     * @param {number} entityId - Entity ID
+     * @param {string} entityType - Entity type
+     * @param {string} noteText - Note content
+     * @returns {Promise} - A promise that resolves with created note
+     */
+    createChatbotNote(entityId, entityType, noteText) {
+      const payload = {
+        entity_id: entityId,
+        note_type: "common",
+        params: {
+          text: `🤖 Chatbot Response:\n${noteText}`
+        }
+      };
+
+      return this.http.request(
+        `/api/v4/${entityType}/${entityId}/notes`,
+        JSON.stringify([payload]),
+        "POST",
+        {
+          baseURL: window.location.origin,
+          headers: {
+            'Content-Type': 'application/json'
           }
+        }
+      );
+    }
 
-          if (!addPostfix) {
-            postfix = "";
+    /**
+     * Create a task from chatbot interaction
+     * @param {number} entityId - Entity ID
+     * @param {string} entityType - Entity type
+     * @param {string} taskText - Task description
+     * @param {number} responsibleUserId - Responsible user ID
+     * @returns {Promise} - A promise that resolves with created task
+     */
+    createChatbotTask(entityId, entityType, taskText, responsibleUserId = null) {
+      const payload = {
+        text: `🤖 Follow-up from Chatbot: ${taskText}`,
+        entity_id: entityId,
+        entity_type: entityType === 'leads' ? 2 : 1,
+        responsible_user_id: responsibleUserId || APP.USER.id,
+        task_type_id: 1,
+        complete_till: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours from now
+      };
+
+      return this.http.request(
+        "/api/v4/tasks",
+        JSON.stringify([payload]),
+        "POST",
+        {
+          baseURL: window.location.origin,
+          headers: {
+            'Content-Type': 'application/json'
           }
+        }
+      );
+    }
 
-          if (cf.length > 0) {
-            cf.forEach(function (field) {
-              if (
-                APP.cf_types[field.type] &&
-                $.inArray(APP.cf_types[field.type], fieldTypes) >= 0
-              ) {
-                fields.push({
-                  id: field.id,
-                  code: (field.code || "").toLowerCase(),
-                  sort: field.sort,
-                  option: field.name + postfix,
-                  type: APP.cf_types[field.type],
-                  entity_type: et,
-                  parent_id: 0,
-                  enums: field.enums || [],
-                  is_hidden: false,
-                });
-              }
-            });
-          }
-        });
+    /**
+     * Process chatbot interaction
+     * @param {Object} config - Chatbot configuration
+     * @param {Object} entityData - Current entity data
+     * @param {string} trigger - What triggered the chatbot
+     * @returns {Promise} - A promise that resolves with chatbot response
+     */
+    processChatbotInteraction(config, entityData, trigger = 'manual') {
+      const payload = {
+        agent_id: config.agent_id,
+        entity_data: entityData,
+        trigger: trigger,
+        timestamp: new Date().toISOString(),
+        kommo_account: APP.widgets.system.subdomain,
+        source: "kommo_widget"
+      };
 
-        return fields;
+      return this.sendToN8nWebhook(
+        config.webhook_url,
+        payload,
+        config.api_key
+      );
+    }
+
+    /**
+     * Get users for task assignment
+     * @returns {Promise} - A promise that resolves with users array
+     */
+    getUsers() {
+      return this.getAccount().then(function(account) {
+        const users = ((account || {})._embedded || {}).users || [];
+        return users.filter(user => user.rights.is_active).map(user => ({
+          id: user.id,
+          option: user.name,
+          name: user.name
+        }));
       });
+    }
+
+    /**
+     * Validate webhook URL format
+     * @param {string} url - URL to validate
+     * @returns {boolean} - Whether URL is valid
+     */
+    validateWebhookUrl(url) {
+      try {
+        const urlObj = new URL(url);
+        return urlObj.protocol === 'https:' && urlObj.hostname.length > 0;
+      } catch (e) {
+        return false;
+      }
     }
   };
 });

@@ -1,85 +1,84 @@
+
 {
   "widget": {
     "name": "Vortex Chatbot n8n",
-    "short_description": "n8n Chatbot • Webhook + Rules",
-    "description": "Connect Kommo to an n8n chatbot workflow in a few clicks."
+    "short_description": "n8n Chatbot • Webhook + AI Agents",
+    "description": "Connect Kommo to an n8n chatbot workflow with OpenAI agents in a few clicks."
   },
   "settings": {
     "custom": "Chatbot Configuration (n8n)",
     "options": {
-      "title": "Chatbot Configuration (n8n)",
-      "desc": "Set up the form for creating a new task"
+      "title": "n8n Workflow Integration",
+      "desc": "Configure your company's AI chatbot integration with n8n workflow"
     },
-    "base": "Automatically create tasks within a selected profile when it's your client's birthday.",
-    "not_active": "Install the widget to begin setup.",
-    "lead": "Lead",
-    "contact": "Contact",
-    "field": {
-      "title": "Birthday field",
-      "desc": "Select a field that contains the birthday date",
-      "tip": "Select a field type \"date\", \"birthday\" or \"date and time\", or create a new field by clicking \"Add new field\"",
-      "or": "or",
-      "create": "Add new field"
+    "base": "Set up your n8n workflow integration with custom OpenAI agents for automated customer interactions.",
+    "not_active": "Install the widget to begin chatbot setup.",
+    "webhook": {
+      "title": "n8n Webhook URL",
+      "desc": "Enter your n8n workflow webhook URL",
+      "placeholder": "https://your-n8n-instance.com/webhook/chatbot"
+    },
+    "agent": {
+      "title": "OpenAI Agent ID",
+      "desc": "Your company's unique OpenAI agent identifier",
+      "placeholder": "agent_12345_company_name"
+    },
+    "api_key": {
+      "title": "Authentication Token",
+      "desc": "Security token for webhook authentication",
+      "placeholder": "Enter your authentication token"
+    },
+    "trigger_conditions": {
+      "title": "Trigger Conditions",
+      "desc": "When should the chatbot be activated?"
     },
     "entity": {
+      "title": "Entity Type",
+      "desc": "Which type of records should trigger the chatbot",
       "options": {
-        "contact": "Contact",
-        "lead": "Lead"
+        "contact": "Contacts",
+        "lead": "Leads",
+        "both": "Contacts and Leads"
       }
     },
-    "type": {
-      "title": "Task type",
-      "desc": "Select the type of task to assign"
+    "events": {
+      "title": "Trigger Events",
+      "desc": "Select which events should activate the chatbot",
+      "options": {
+        "created": "New record created",
+        "updated": "Record updated",
+        "status_changed": "Status changed",
+        "note_added": "Note added"
+      }
     },
-    "responsible": {
-      "title": "Responsible user",
-      "desc": "Assign a user responsible for this task",
-      "select": "Select users",
-      "numeral": "user,user,users",
-      "current": "Current responsible user"
+    "test": {
+      "title": "Test Integration",
+      "desc": "Test your n8n workflow connection",
+      "button": "Test Connection",
+      "success": "✅ Connection successful! Your chatbot is ready.",
+      "error": "❌ Connection failed. Please check your settings."
     },
-    "text": {
-      "title": "Task description",
-      "desc": "Write the description or leave the field empty",
-      "placeholder": "Task description..."
-    },
-    "template": {
-      "title": "Chat templates",
-      "desc": "Create a chat template to send to your clients",
-      "name": {
-        "title": "Template name",
-        "desc": "Enter the template name that will be shown in the profile"
-      },
-      "text": {
-        "title": "Message text",
-        "desc": "Write the message text that will be sent to the client",
-        "placeholder": "Message..."
-      },
-      "list": {
-        "title": "List of created templates"
-      },
-      "create": "Create a template"
+    "response_handling": {
+      "title": "Response Handling",
+      "desc": "How should chatbot responses be handled in Kommo?",
+      "options": {
+        "note": "Add as note",
+        "task": "Create task",
+        "both": "Note and task"
+      }
     },
     "errors": {
-      "template_fields_required": "Enter the template name and message text to continue."
-    },
-    "modal": {
-      "title": "Create new Birthday field",
-      "name": {
-        "title": "Name of the field",
-        "desc": "Enter name of the field"
-      },
-      "entity": {
-        "title": "Type of object",
-        "desc": "Select type of object"
-      },
-      "success_saved": "New Birthday field was successfully created.",
-      "create": "Create a field"
+      "webhook_required": "Webhook URL is required",
+      "agent_required": "Agent ID is required",
+      "invalid_webhook": "Invalid webhook URL format"
     },
     "widget_panel": {
-      "birthday": "Today is your client's birthday!",
-      "not_birthday": "No birthdays today. Check back tomorrow!",
-      "congratulate": "Send a birthday wish"
+      "title": "AI Chatbot",
+      "status_active": "Chatbot is active and monitoring",
+      "status_inactive": "Chatbot is inactive",
+      "last_interaction": "Last interaction:",
+      "trigger_chat": "Trigger Chatbot",
+      "processing": "Processing with AI..."
     }
   }
 }

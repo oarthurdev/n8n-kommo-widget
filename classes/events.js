@@ -1,3 +1,4 @@
+
 define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
   return class Events {
     constructor(widget) {
@@ -6,289 +7,252 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
 
     settings() {
       let _this = this;
-      const MODAL_DESTROY_TIMEOUT = 3000;
 
-      // Event handler for creating a new birthday field
-      $(".kommo-n8n__field-create__link").on("click", function () {
-        // Create and display a modal for field creation
-        let modal = _this.widget.templates.twig.modal(
-          _this.widget.templates.render("settings.modal", {
-            prefix: _this.widget.config.prefix,
-            langs: _this.widget.i18n("settings.modal"),
-            name: _this.widget.templates.twig.input({
-              block: "field",
-              code: "name",
-            }),
-            entity: _this.widget.templates.twig.select({
-              block: "field",
-              code: "entity",
-              items: [
-                {
-                  id: APP.element_types.contacts,
-                  option: _this.widget.i18n("settings.entity.options.contact"),
-                },
-                {
-                  id: APP.element_types.leads,
-                  option: _this.widget.i18n("settings.entity.options.lead"),
-                },
-              ],
-              selected: APP.element_types.contacts,
-            }),
+      // Test connection button handler
+      $("#kommo-n8n-test-button").on("click", function() {
+        const webhookUrl = $("#kommo-n8n-webhook-url").val();
+        const agentId = $("#kommo-n8n-agent-id").val();
+        const apiKey = $("#kommo-n8n-api-key").val();
 
-            button: _this.widget.templates.twig.button({
-              block: "field",
-              code: "btn",
-              text: _this.widget.i18n("settings.modal.create"),
-            }),
-          }),
+        if (!webhookUrl || !agentId) {
+          _this.showTestResult(false, _this.widget.i18n("settings.errors.webhook_required"));
+          return;
+        }
 
-          // Callback when the modal is created
-          function () {},
-          _this.widget.config.prefix + "__field-modal"
-        );
+        if (!_this.widget.kommo.validateWebhookUrl(webhookUrl)) {
+          _this.showTestResult(false, _this.widget.i18n("settings.errors.invalid_webhook"));
+          return;
+        }
 
-        // Event handler for the button in the modal
-        $("#" + _this.widget.config.prefix + "-field-btn-id").on(
-          "click",
+        // Show loading state
+        $("#kommo-n8n-test-button").prop("disabled", true).text("Testing...");
+        $("#kommo-n8n-test-result").hide();
 
-          function () {
-            const resultModal = new Modal();
-
-            let selected = {};
-            // Serialize form data into JSON
-            let form =
-              $(
-                "#" + _this.widget.config.prefix + "__field-form"
-              ).serializeJSON().params || {};
-            let et = parseInt(form.field.entity) === 1 ? "contacts" : "leads";
-
-            // Create a new birthday field
-            _this.widget.kommo
-              .createField(et, {
-                type: "birthday",
-                name: form.field.name,
-              })
-              .then(function (result) {
-                selected = result;
-
-                // Fetch available fields for the select element
-                return _this.widget.kommo.getFieldsByType(
-                  [
-                    APP.cf_types.date,
-                    APP.cf_types.date_time,
-                    APP.cf_types.birthday,
-                  ],
-                  [APP.element_types.contacts, APP.element_types.leads],
-                  true
-                );
-              })
-              .then(function (fields) {
-                // Update the select element with new fields
-                $("." + _this.widget.config.prefix + "__field-id").replaceWith(
-                  _this.widget.templates.twig.select({
-                    block: "field",
-                    code: "id",
-                    items: fields,
-                    selected: selected.id || 0,
-                  })
-                );
-
-                modal.destroy();
-
-                resultModal.showSuccess(
-                  _this.widget.i18n("settings.modal.success_saved"),
-                  false,
-                  MODAL_DESTROY_TIMEOUT
-                );
-              })
-              .catch(() => {
-                resultModal.showError("", false);
-              });
-          }
-        );
+        _this.widget.kommo.testN8nConnection(webhookUrl, agentId, apiKey)
+          .then(function(response) {
+            _this.showTestResult(true, _this.widget.i18n("settings.test.success"));
+          })
+          .catch(function(error) {
+            _this.showTestResult(false, _this.widget.i18n("settings.test.error"));
+          })
+          .finally(function() {
+            $("#kommo-n8n-test-button").prop("disabled", false).text(_this.widget.i18n("settings.test.button"));
+          });
       });
 
-      // If templates exist, initialize and display them
-      if (_this.widget.info.params.templates.length > 0) {
-        let created = _this.widget.info.params.templates.split(",");
-        $("#kommo-n8n-templates-list").val(
-          _this.widget.info.params.templates || ""
-        );
-        _this.widget.kommo.getTemplates().then(function (templates) {
-          created = created.map(function (item) {
-            return parseInt(item);
-          });
-          templates.filter(function (item) {
-            if ($.inArray(item.id, created) > -1) {
-              $("#kommo-n8n-templates-list-ul").append(
-                "<li>" + item.name + "</li>"
-              );
-            }
-          });
-        });
-      }
-
-      // Event handler for creating a new birthday template
-      $("#kommo-n8n-template-create-id").on("click", function () {
-        let name = $("#kommo-n8n-template-name-id").val();
-        let text = $("#kommo-n8n-template-text-id").val();
-
-        if (name.length === 0 || text.length === 0) {
-          // Show error if fields are empty
-          new Modal().showError(
-            _this.widget.i18n("settings.errors.template_fields_required"),
-            false
-          );
+      // Webhook URL validation on input
+      $("#kommo-n8n-webhook-url").on("blur", function() {
+        const url = $(this).val();
+        if (url && !_this.widget.kommo.validateWebhookUrl(url)) {
+          $(this).addClass("error");
+          _this.showValidationError(_this.widget.i18n("settings.errors.invalid_webhook"));
         } else {
-          // Create a new template
-          _this.widget.kommo
-            .createTemplate({
-              name: name,
-              reply_name: name,
-              content: text,
-              reply_text: text,
-              is_editable: true,
-              type: "amocrm",
-              attachments: [],
-              buttons: [],
-              widget_code: null,
-              client_uuid: null,
-              creator_logo_url: null,
-              waba_footer: null,
-              waba_category: null,
-              waba_language: null,
-              waba_examples: {},
-              reviews: null,
-              waba_header: null,
-              waba_selected_waba_ids: [],
-            })
-            .then(function (id) {
-              if (parseInt(id) > 0) {
-                // Clear input fields and update template list
-                $("#kommo-n8n-template-text-id").val("");
-                $("#kommo-n8n-template-name-id").val("");
-
-                let old = $("#kommo-n8n-templates-list").val().split(",");
-                old.push(id);
-                old = old.filter(function (item) {
-                  return parseInt(item) > 0;
-                });
-                $("#kommo-n8n-templates-list").val(old.join(","));
-                $("#kommo-n8n-templates-list-ul").append(
-                  "<li>" + name + "</li>"
-                );
-              }
-            });
+          $(this).removeClass("error");
+          _this.hideValidationError();
         }
       });
     }
 
     /**
-     * Get birthday information based on current date.
-     * @returns {Object} - Contains information if today is a birthday and the current date.
+     * Show test connection result
+     * @param {boolean} success - Whether test was successful
+     * @param {string} message - Result message
      */
-    getBirthdayInfo() {
-      const fieldId = parseInt(
-        this.widget.getNested(this.widget.info.params, "field.id", "")
-      );
-
-      const $wrap = $('.linked-form__field[data-id="' + fieldId + '"]');
-      const filtered = $wrap.filter(function () {
-        const formattedDate = Moment().format(
-          APP.system.format.date.date_short
-        );
-        const dayMonth = $(this).find("input").val().slice(0, 5);
-
-        return dayMonth === formattedDate;
-      });
-
-      const currentDate = Moment().format(APP.system.format.date.date);
-
-      return {
-        isBirthday: filtered.length > 0,
-        currentDate: currentDate,
-      };
+    showTestResult(success, message) {
+      const $result = $("#kommo-n8n-test-result");
+      $result.removeClass("success error")
+             .addClass(success ? "success" : "error")
+             .text(message)
+             .fadeIn(300);
     }
 
     /**
-     * Handle the card view, create tasks if it's a birthday.
+     * Show validation error
+     * @param {string} message - Error message
+     */
+    showValidationError(message) {
+      // Implementation for showing validation errors
+      console.warn("Validation error:", message);
+    }
+
+    /**
+     * Hide validation error
+     */
+    hideValidationError() {
+      // Implementation for hiding validation errors
+    }
+
+    /**
+     * Handle card view events and chatbot triggers
      */
     card() {
       const _this = this;
+      const config = _this.widget.info.params || {};
 
-      const { isBirthday } = _this.getBirthdayInfo();
+      // Check if chatbot is configured
+      if (!config.webhook_url || !config.agent_id) {
+        return;
+      }
 
-      if (isBirthday) {
-        let entityType = parseInt(
-          _this.widget.getNested(_this.widget.info.params, "entity.type", 2)
-        );
+      // Set up automatic triggers based on configuration
+      _this.setupAutoTriggers(config);
+    }
 
-        let responsibles = _this.widget.getNested(
-          _this.widget.info.params,
-          "tasks.responsible",
-          {}
-        );
+    /**
+     * Set up automatic chatbot triggers
+     * @param {Object} config - Chatbot configuration
+     */
+    setupAutoTriggers(config) {
+      const _this = this;
+      const entityType = APP.widgets.system.area === 'lcard' ? 'leads' : 'contacts';
+      const entityId = APP.widgets.system.entity_id;
 
-        // Add the main user to the list of responsibles if not already present
-        if (responsibles[1]) {
-          responsibles[APP.data.current_card.main_user] =
-            APP.data.current_card.main_user;
-        }
-
-        // If the entity type matches and the user is responsible, create a task
-        if (
-          entityType === parseInt(APP.data.current_card.element_type) &&
-          responsibles[APP.constant("user").id]
-        ) {
-          _this.createTask(isBirthday);
-        }
+      // Monitor for configured events
+      if (config.events && config.events.length > 0) {
+        config.events.forEach(function(eventType) {
+          _this.setupEventListener(eventType, entityType, entityId, config);
+        });
       }
     }
 
     /**
-     * Create a task if it's a birthday
-     * @param {boolean} isBirthday - Whether today is a birthday.
+     * Set up event listener for specific event type
+     * @param {string} eventType - Type of event to listen for
+     * @param {string} entityType - Entity type (leads/contacts)
+     * @param {number} entityId - Entity ID
+     * @param {Object} config - Chatbot configuration
      */
-    createTask(isBirthday) {
+    setupEventListener(eventType, entityType, entityId, config) {
       const _this = this;
 
-      let { currentDate } = _this.getBirthdayInfo();
-
-      if (isBirthday) {
-        const taskType = parseInt(
-          _this.widget.getNested(_this.widget.info.params, "tasks.type", 1)
-        );
-
-        // Check if there are existing tasks
-        _this.widget.kommo
-          .getTasks({
-            is_completed: 0,
-            entity_type: APP.data.current_entity,
-            entity_id: APP.data.current_card.id,
-            task_type: taskType,
-          })
-          .then(function (tasks) {
-            // If no tasks exist, create a new one
-            if (tasks.length === 0) {
-              _this.widget.kommo.createTask({
-                responsible_user_id: APP.constant("user").id,
-                entity_id: APP.data.current_card.id,
-                entity_type: "leads",
-                task_type_id: taskType,
-                text: _this.widget.getNested(
-                  _this.widget.info.params,
-                  "tasks.text",
-                  "-"
-                ),
-
-                complete_till: Moment(
-                  (currentDate += " 23:59"),
-                  APP.system.format.date.full
-                ).unix(),
-              });
+      switch(eventType) {
+        case 'status_changed':
+          // Listen for status changes
+          $(document).on('pipeline:status:changed', function(e, data) {
+            if (data.entity_id === entityId) {
+              _this.triggerChatbot(config, entityType, entityId, 'status_changed');
             }
           });
+          break;
+
+        case 'note_added':
+          // Listen for new notes
+          $(document).on('note:added', function(e, data) {
+            if (data.entity_id === entityId) {
+              _this.triggerChatbot(config, entityType, entityId, 'note_added');
+            }
+          });
+          break;
+
+        case 'updated':
+          // Listen for entity updates
+          $(document).on('entity:updated', function(e, data) {
+            if (data.entity_id === entityId) {
+              _this.triggerChatbot(config, entityType, entityId, 'updated');
+            }
+          });
+          break;
       }
+    }
+
+    /**
+     * Trigger chatbot interaction
+     * @param {Object} config - Chatbot configuration
+     * @param {string} entityType - Entity type
+     * @param {number} entityId - Entity ID
+     * @param {string} trigger - What triggered the chatbot
+     */
+    triggerChatbot(config, entityType, entityId, trigger = 'manual') {
+      const _this = this;
+
+      // Show processing state
+      _this.showProcessingState(true);
+
+      // Get entity data
+      _this.widget.kommo.getEntityData(entityId, entityType)
+        .then(function(entityData) {
+          return _this.widget.kommo.processChatbotInteraction(config, entityData, trigger);
+        })
+        .then(function(chatbotResponse) {
+          return _this.handleChatbotResponse(chatbotResponse, config, entityType, entityId);
+        })
+        .catch(function(error) {
+          console.error('Chatbot interaction failed:', error);
+          _this.showError('Failed to process chatbot interaction');
+        })
+        .finally(function() {
+          _this.showProcessingState(false);
+        });
+    }
+
+    /**
+     * Handle chatbot response and create notes/tasks as configured
+     * @param {Object} response - Chatbot response
+     * @param {Object} config - Chatbot configuration
+     * @param {string} entityType - Entity type
+     * @param {number} entityId - Entity ID
+     */
+    handleChatbotResponse(response, config, entityType, entityId) {
+      const _this = this;
+      const promises = [];
+
+      if (response && response.message) {
+        // Handle response based on configuration
+        switch(config.response_handling) {
+          case 'note':
+            promises.push(_this.widget.kommo.createChatbotNote(entityId, entityType, response.message));
+            break;
+          
+          case 'task':
+            promises.push(_this.widget.kommo.createChatbotTask(entityId, entityType, response.message));
+            break;
+          
+          case 'both':
+            promises.push(_this.widget.kommo.createChatbotNote(entityId, entityType, response.message));
+            promises.push(_this.widget.kommo.createChatbotTask(entityId, entityType, response.message));
+            break;
+        }
+      }
+
+      return Promise.all(promises);
+    }
+
+    /**
+     * Show/hide processing state
+     * @param {boolean} show - Whether to show processing state
+     */
+    showProcessingState(show) {
+      if (show) {
+        $("#kommo-n8n-processing").fadeIn(200);
+        $(".kommo-n8n__button-trigger").prop("disabled", true);
+      } else {
+        $("#kommo-n8n-processing").fadeOut(200);
+        $(".kommo-n8n__button-trigger").prop("disabled", false);
+      }
+    }
+
+    /**
+     * Show error message
+     * @param {string} message - Error message
+     */
+    showError(message) {
+      new Modal().showError(message, false);
+    }
+
+    /**
+     * Initialize manual chatbot trigger button
+     */
+    init() {
+      const _this = this;
+
+      // Manual trigger button handler
+      $(".kommo-n8n__button-trigger").on("click", function() {
+        const entityType = APP.widgets.system.area === 'lcard' ? 'leads' : 'contacts';
+        const entityId = APP.widgets.system.entity_id;
+        const config = _this.widget.info.params || {};
+
+        _this.triggerChatbot(config, entityType, entityId, 'manual');
+      });
     }
   };
 });

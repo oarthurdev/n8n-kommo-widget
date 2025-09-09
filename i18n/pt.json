@@ -1,85 +1,84 @@
+
 {
   "widget": {
     "name": "Vortex Chatbot n8n",
-    "short_description": "Chatbot n8n • Webhook + Regras",
-    "description": "Conecte seu Kommo a um workflow de chatbot no n8n em poucos cliques."
+    "short_description": "Chatbot n8n • Webhook + Agentes IA",
+    "description": "Conecte seu Kommo a um workflow de chatbot no n8n com agentes OpenAI em poucos cliques."
   },
   "settings": {
     "custom": "Configuração do Chatbot (n8n)",
     "options": {
-      "title": "Configuração do Chatbot (n8n)",
-      "desc": "Defina o formulário para criar uma nova tarefa"
+      "title": "Integração com Workflow n8n",
+      "desc": "Configure a integração do chatbot IA da sua empresa com workflow n8n"
     },
-    "base": "Automaticamente cria tarefas dentro de um perfil selecionado no dia do aniversário do seu cliente.",
-    "not_active": "Instale o widget para começar a configuração",
-    "lead": "Lead",
-    "contact": "Contato",
-    "field": {
-      "title": "Campo de aniversário",
-      "desc": "Selecione um campo que contenha a data de aniversário",
-      "tip": "Selecione um tipo de campo “data”, “aniversário” ou “data e hora”, ou crie um novo campo ao clicar “adicionar novo campo”.",
-      "or": "ou ",
-      "create": "Adicionar novo campo"
+    "base": "Configure sua integração com workflow n8n usando agentes OpenAI personalizados para interações automatizadas com clientes.",
+    "not_active": "Instale o widget para começar a configuração do chatbot.",
+    "webhook": {
+      "title": "URL do Webhook n8n",
+      "desc": "Insira a URL do webhook do seu workflow n8n",
+      "placeholder": "https://sua-instancia-n8n.com/webhook/chatbot"
+    },
+    "agent": {
+      "title": "ID do Agente OpenAI",
+      "desc": "Identificador único do agente OpenAI da sua empresa",
+      "placeholder": "agente_12345_nome_empresa"
+    },
+    "api_key": {
+      "title": "Token de Autenticação",
+      "desc": "Token de segurança para autenticação do webhook",
+      "placeholder": "Insira seu token de autenticação"
+    },
+    "trigger_conditions": {
+      "title": "Condições de Ativação",
+      "desc": "Quando o chatbot deve ser ativado?"
     },
     "entity": {
+      "title": "Tipo de Entidade",
+      "desc": "Que tipo de registro deve acionar o chatbot",
       "options": {
-        "contact": "Contato",
-        "lead": "Lead"
+        "contact": "Contatos",
+        "lead": "Leads",
+        "both": "Contatos e Leads"
       }
     },
-    "type": {
-      "title": "Tipo de tarefa",
-      "desc": "Selecione o tipo de tarefa que será atribuida"
+    "events": {
+      "title": "Eventos de Ativação",
+      "desc": "Selecione quais eventos devem ativar o chatbot",
+      "options": {
+        "created": "Novo registro criado",
+        "updated": "Registro atualizado",
+        "status_changed": "Status alterado",
+        "note_added": "Nota adicionada"
+      }
     },
-    "responsible": {
-      "title": "Usuário responsável",
-      "desc": "Escolha o usuário responsável por esta tarefa",
-      "select": "Usuários selecionados",
-      "numeral": "usuário,usuário,usuários",
-      "current": "Usuário responsável atual"
+    "test": {
+      "title": "Testar Integração",
+      "desc": "Teste a conexão com seu workflow n8n",
+      "button": "Testar Conexão",
+      "success": "✅ Conexão bem-sucedida! Seu chatbot está pronto.",
+      "error": "❌ Falha na conexão. Verifique suas configurações."
     },
-    "text": {
-      "title": "Descrição da tarefa",
-      "desc": "Escreva a descrição ou deixe o campo em branco",
-      "placeholder": "Descrição da tarefa…"
-    },
-    "template": {
-      "title": "Modelos de chat",
-      "desc": "Crie um modelo de chat para enviar aos seus clientes",
-      "name": {
-        "title": "Nome do modelo",
-        "desc": "Insira o nome do modelo que aparecerá no perfil"
-      },
-      "text": {
-        "title": "Texto da mensagem",
-        "desc": "Escreva a mensagem que será enviada ao cliente",
-        "placeholder": "Mensagem…"
-      },
-      "list": {
-        "title": "Lista de modelos criados"
-      },
-      "create": "Criar um modelo"
+    "response_handling": {
+      "title": "Tratamento de Resposta",
+      "desc": "Como as respostas do chatbot devem ser tratadas no Kommo?",
+      "options": {
+        "note": "Adicionar como nota",
+        "task": "Criar tarefa",
+        "both": "Nota e tarefa"
+      }
     },
     "errors": {
-      "template_fields_required": "Insira o nome do modelo e o texto da mensagem para continuar"
-    },
-    "modal": {
-      "title": "Criar novo campo Aniversário",
-      "name": {
-        "title": "Nome do campo",
-        "desc": "Inserir nome do campoo"
-      },
-      "entity": {
-        "title": "Tipo de objeto",
-        "desc": "Selecionar tipo de objeto"
-      },
-      "success_saved": "Novo campo Aniversário foi criado com sucesso",
-      "create": "Criar campo"
+      "webhook_required": "URL do webhook é obrigatória",
+      "agent_required": "ID do agente é obrigatório",
+      "invalid_webhook": "Formato de URL do webhook inválido"
     },
     "widget_panel": {
-      "birthday": "Hoje é aniversário do seu cliente!",
-      "not_birthday": "Sem aniversários hoje. Cheque de novo amanhã!",
-      "congratulate": "Enviar parabéns"
+      "title": "Chatbot IA",
+      "status_active": "Chatbot ativo e monitorando",
+      "status_inactive": "Chatbot inativo",
+      "last_interaction": "Última interação:",
+      "trigger_chat": "Acionar Chatbot",
+      "processing": "Processando com IA..."
     }
   }
 }

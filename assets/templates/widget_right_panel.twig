@@ -1,6 +1,30 @@
-<div class="kommo-n8n__right_panel__inner">
-  <p class="kommo-n8n__right_panel__inner_text">
-    {{text|raw}}
-  </p>
-  {{ button|raw}}
+
+<div class="kommo-n8n__right_panel__container">
+  <div class="kommo-n8n__right_panel__inner">
+    <div class="kommo-n8n__right_panel__inner_text">
+      <strong>{{ langs.title }}</strong>
+    </div>
+    
+    <div class="kommo-n8n__chatbot-status">
+      <div class="kommo-n8n__status-indicator {{ status_class }}"></div>
+      <span class="kommo-n8n__status-text">{{ status_text }}</span>
+    </div>
+
+    {% if last_interaction %}
+      <div class="kommo-n8n__last-interaction">
+        <small>{{ langs.last_interaction }} {{ last_interaction }}</small>
+      </div>
+    {% endif %}
+
+    {% if can_trigger %}
+      <div class="kommo-n8n__actions">
+        {{ trigger_button }}
+      </div>
+    {% endif %}
+
+    <div id="kommo-n8n-processing" class="kommo-n8n__processing" style="display: none;">
+      <div class="kommo-n8n__spinner"></div>
+      <span>{{ langs.processing }}</span>
+    </div>
+  </div>
 </div>

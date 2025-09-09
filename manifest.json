@@ -1,3 +1,4 @@
+
 {
   "widget": {
     "name": "widget.name",
@@ -13,7 +14,7 @@
       "email": "contato@vortexhub.com.br"
     }
   },
-  "locations": ["settings"],
+  "locations": ["settings", "lcard", "ccard"],
   "settings": {
     "custom": {
       "name": "settings.custom",

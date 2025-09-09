@@ -1,85 +1,153 @@
-<p align="center"><img width="552" alt="new kommo" src="images/github images/kommo_logo.png"></p>
 
-# Kommo Birthday Widget
+<p align="center"><img width="552" alt="kommo n8n chatbot" src="images/github images/kommo_logo.png"></p>
+
+# Kommo n8n Chatbot Widget
 
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
 
-
 ## Description
 
-This widget is designed to enhance data management within your account. It includes features for creating tasks, configuring custom fields and templates, automating tasks based on birthdays, send birthday wishes to contacts in the lead profile.
+This widget enables seamless integration between Kommo CRM and n8n workflows with OpenAI chatbot agents. Perfect for companies that want to implement AI-powered customer interactions with their own custom agents while using a standardized n8n workflow.
 
 ## Features
 
-- **Task Creation and Management**: Allows you to create and manage tasks via the API.
-- **Custom Fields**: Create and configure custom fields, such as "birthday" fields.
-- **Templates**: Support for creating and managing message templates.
-- **Birthday wishes**: Send the template with birthday wishes via pressing the button in the lead profile.
-- **Task Automation**: Automatically creates tasks based on settings and events.
+- **n8n Workflow Integration**: Connect to your n8n instance via webhook
+- **Custom OpenAI Agents**: Each company can use their own OpenAI agent ID
+- **Automatic Triggers**: Activate chatbot based on CRM events (new leads, status changes, notes)
+- **Manual Triggers**: Manual chatbot activation from lead/contact profiles
+- **Response Handling**: Automatically create notes and/or tasks from chatbot responses
+- **Connection Testing**: Built-in webhook connection testing
+- **Multi-language Support**: English and Portuguese translations
 
 ## Installation
 
 1. **Upload the Widget**: Upload the widget files to the Kommo platform as a private integration.
-2. **Install the Widget**: Once uploaded, install the widget through Kommo’s integration's settings page.
+2. **Install the Widget**: Install the widget through Kommo's integrations settings page.
+3. **Configure n8n Workflow**: Set up your n8n workflow with webhook trigger and OpenAI node.
+
+## Configuration
+
+### 1. n8n Workflow Setup
+
+Your n8n workflow should:
+- Start with a webhook trigger
+- Include an OpenAI node with your custom agent
+- Return a JSON response with `message` field
+
+### 2. Widget Settings
+
+Configure the following in the widget settings:
+
+- **Webhook URL**: Your n8n workflow webhook endpoint
+- **Agent ID**: Your company's unique OpenAI agent identifier  
+- **Authentication Token**: Optional security token for webhook
+- **Entity Types**: Choose which entities (leads/contacts) trigger the chatbot
+- **Trigger Events**: Select events that activate the chatbot:
+  - New record created
+  - Record updated
+  - Status changed
+  - Note added
+- **Response Handling**: How to handle chatbot responses:
+  - Add as note
+  - Create task
+  - Both note and task
+
+### 3. Testing Connection
+
+Use the built-in connection test to verify your n8n workflow integration before going live.
 
 ## Usage
 
+### Automatic Triggers
+
+The chatbot automatically activates based on your configured trigger events. When triggered, it:
+
+1. Fetches current entity data from Kommo
+2. Sends data to your n8n workflow
+3. Receives AI-generated response
+4. Creates notes/tasks in Kommo based on configuration
+
+### Manual Triggers
+
+Users can manually trigger the chatbot from the lead/contact profile using the "Trigger Chatbot" button in the right panel.
+
 ### Interface
 
-The widget is available in the following locations:
+The widget provides:
 
-- **Widget Settings**: Access settings and create new fields and templates.
-- **Lead Profile**: The widget can be embedded in the entity profile for task and field management.
+- **Settings Panel**: Complete configuration interface
+- **Right Panel**: Status indicator and manual trigger button
+- **Processing Indicator**: Visual feedback during AI processing
 
-### Creating and Managing Tasks
+## Business Model
 
-1. Open the widget settings and select the tasks section.
- 
-   <img width="600" alt="add task" src="images/github images/task.png">
+This widget is designed for B2B sales to companies wanting AI chatbot integration:
 
-2. Create a new task, specify the required parameters, and save it.
+- **Standardized Workflow**: One n8n workflow template for all clients
+- **Custom Agents**: Each company uses their own trained OpenAI agent
+- **Easy Setup**: Minimal configuration required per company
+- **Scalable**: Single workflow handles multiple company integrations
 
-### Working with Fields
+## Technical Architecture
 
-1. In the fields section, add new custom fields such as a Birthday/Date/Date and Time field for contacts or leads.
-   <br>
-   <img width="600" alt="add field" src="images/github images/create_field.png">
-2. Or choose one that already exists.
-   <br>
-   <img width="600" alt="select field" src="images/github images/select_field.png">
+```
+Kommo CRM → Widget → n8n Webhook → OpenAI Agent → Response → Kommo (Notes/Tasks)
+```
 
-### Message Templates
+## Development
 
-1. Go to the templates section in widget settings and create a new template.
-   <br>
-   <img width="600" alt="create template" src="images/github images/create_template.png">
+The widget uses Kommo's widget framework with:
 
-2. Provide the name and content of the template.
-3. Use the templates for messages based on events.
+- **AMD Modules**: Modular JavaScript architecture
+- **Twig Templates**: Templating for UI components
+- **CSS Components**: Styled interface elements
+- **Event Handling**: CRM event listeners and webhook integration
 
-### Send a birthday wish:
+## API Integration
 
-1. On the right panel of a lead profile click the button 'Send a birthday wish' if it exists.
-   <br><br>
-    <img width="213" alt="birthday button" src="images/github images/birthday_button.png">
-    
-2. Choose your template from the list of templates.
-   <br>
-<img width="492" alt="templates list" src="images/github images/Send _template.png">
+### Webhook Payload
 
-### Notes
+The widget sends the following data to your n8n workflow:
 
-- **Caching**: The widget uses caching to speed up requests and reduce server load.
+```json
+{
+  "agent_id": "your_company_agent_id",
+  "entity_data": {
+    "id": 12345,
+    "name": "Lead Name",
+    "status": "New",
+    "custom_fields": {...},
+    "notes": [...],
+    "tasks": [...]
+  },
+  "trigger": "status_changed",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "kommo_account": "account_subdomain",
+  "source": "kommo_widget"
+}
+```
 
+### Expected Response
 
-## Additional Resources
+Your n8n workflow should return:
 
-The full tutorial on developing this widget is available on [Kommo developers' page](https://developers.kommo.com/docs/widgets-tutorial).
+```json
+{
+  "message": "AI-generated response text",
+  "status": "success"
+}
+```
+
+## Support
+
+- **Website**: [https://vortexhub.com.br](https://vortexhub.com.br)
+- **Email**: contato@vortexhub.com.br
+- **Documentation**: [Kommo Developers](https://developers.kommo.com/docs/widgets-tutorial)
+
+## License
+
+MIT License - See LICENSE file for details.
 
 ## Community
 
 Join our community on [Discord](https://discord.gg/CjstJTrBHu)!
-
-## License
-
-MIT
