@@ -32,11 +32,20 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
 
             // Update agents select dropdown
             const $select = $("#kommo-n8n-agents-select");
+            console.log("Select element found:", $select.length > 0);
+            console.log("Select element visible:", $select.is(':visible'));
+            
+            if ($select.length === 0) {
+              console.error("Select element not found in DOM");
+              return;
+            }
+            
             $select.empty();
             $select.append('<option value="">Selecione um agente...</option>');
 
             if (agents && agents.length > 0) {
               agents.forEach(function(agent) {
+                console.log("Adding agent to select:", agent);
                 $select.append(`<option value="${agent.id}">${agent.name}</option>`);
               });
 
@@ -44,6 +53,7 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
               _this.widget.info.params = _this.widget.info.params || {};
               _this.widget.info.params.available_agents = agents;
 
+              console.log("Select options after update:", $select.find('option').length);
               alert(`Agentes carregados com sucesso! ${agents.length} agente(s) encontrado(s).`);
             } else {
               alert("Nenhum agente encontrado. Verifique sua chave API.");

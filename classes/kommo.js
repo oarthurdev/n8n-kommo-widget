@@ -221,8 +221,8 @@ define(["./http.js"], function (Http) {
         if (data.data && Array.isArray(data.data)) {
           const agents = data.data.map(agent => ({
             id: agent.id,
-            option: agent.name || agent.id,
-            name: agent.name || agent.id
+            name: agent.name || agent.id,
+            option: agent.name || agent.id
           }));
           
           console.log("Processed agents:", agents);
