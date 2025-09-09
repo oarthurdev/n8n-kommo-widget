@@ -13,7 +13,7 @@ define(["./http.js"], function (Http) {
     getAccount() {
       return this.http.request(
         "/api/v4/account",
-        { with: "task_types,users" },
+        { with: "users" },
         "GET",
         {
           cache: { key: "n8n_account", expires: 60 },
@@ -167,6 +167,22 @@ define(["./http.js"], function (Http) {
         config.webhook_url,
         payload,
         config.api_key
+      );
+    }
+
+    /**
+     * Get task types
+     * @returns {Promise} - A promise that resolves with task types array
+     */
+    getTaskTypes() {
+      return this.http.request(
+        "/api/v4/tasks/types",
+        {},
+        "GET",
+        {
+          cache: { key: "n8n_task_types", expires: 300 },
+          baseURL: window.location.origin,
+        }
       );
     }
 
