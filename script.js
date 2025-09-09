@@ -199,8 +199,13 @@ define([
                     block: "agents",
                     code: "select",
                     id: "kommo-n8n-agents-select",
+                    // usa a lista já normalizada
                     items: _this.getNested(_this.info.params, "available_agents", []),
-                    selected: _this.getNested(_this.info.params, "selected_agent", ""),
+                    // faz fallback caso tenha sido salvo no formato antigo
+                    selected: _this.getNested(_this.info.params, "selected_agent",
+                              _this.getNested(_this.info.params, "agents.select", "")),
+                    // 🔧 chave certa para bater com validateSettings()
+                    name: "params[selected_agent]",
                     placeholder: _this.i18n("settings.agents.placeholder"),
                   }),
 

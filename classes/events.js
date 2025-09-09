@@ -16,7 +16,7 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
         console.log("API Key length:", apiKey ? apiKey.length : 0);
 
         if (!apiKey) {
-          alert("Por favor, insira sua chave API OpenAI primeiro");
+          _this.showNotification("Please enter your OpenAI API key first", "error");
           return;
         }
 
@@ -26,51 +26,39 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
 
         console.log("Starting to load OpenAI agents...");
 
-        _this.widget.kommo.loadOpenAIAgents(apiKey)
+       _this.widget.kommo.loadOpenAIAgents(apiKey)
           .then(function(agents) {
-            console.log("Agents loaded successfully:", agents);
-
-            // Update agents select dropdown
+            // Normaliza pro formato que o select.twig entende
+            const items = [{ id: "", option: "Selecione..." }].concat(
+              (agents || [])
+                .filter(a => a.id != null)
+                .map(a => ({ id: String(a.id), option: a.name || `Agente ${a.id}` }))
+            );
+            // Atualiza o SELECT no DOM (imediato)
             const $select = $("#kommo-n8n-agents-select");
-            console.log("Select element found:", $select.length > 0);
-            console.log("Select element visible:", $select.is(':visible'));
-            
-            if ($select.length === 0) {
-              console.error("Select element not found in DOM");
-              return;
-            }
-            
-            $select.empty();
-            $select.append('<option value="">Selecione um agente...</option>');
+            $select.empty().append('<option value="">Selecione um agente...</option>');
+            items.forEach(it => {
+              const $option = $("<option>").val(it.id).text(it.option);
+              $select.append($option);
+            });
 
-            if (agents && agents.length > 0) {
-              agents.forEach(function(agent) {
-                console.log("Adding agent to select:", agent);
-                $select.append(`<option value="${agent.id}">${agent.name}</option>`);
-              });
-
-              // Store agents in widget params
-              _this.widget.info.params = _this.widget.info.params || {};
-              _this.widget.info.params.available_agents = agents;
-
-              console.log("Select options after update:", $select.find('option').length);
-              alert(`Agentes carregados com sucesso! ${agents.length} agente(s) encontrado(s).`);
-            } else {
-              alert("Nenhum agente encontrado. Verifique sua chave API.");
-            }
+            // Persiste normalizado para re-renderizações futuras
+            _this.showNotification(`Agentes carregados com sucesso! ${items.length} agente(s) encontrado(s).`, "success");
+            _this.widget.info.params.available_agents = items;
           })
           .catch(function(error) {
-            console.error("Error loading agents:", error);
             let errorMsg = "Falha ao carregar agentes. ";
-            if (error.message) {
+            if (error && error.message) {
               errorMsg += error.message;
             } else {
               errorMsg += "Verifique sua chave API OpenAI.";
             }
-            alert(errorMsg);
+            _this.showNotification(errorMsg, "error");
           })
           .finally(function() {
-            $button.prop("disabled", false).text("Carregar Agentes");
+            // Use i18n or a variable for the button text to support localization
+            const buttonText = _this.widget.i18n ? _this.widget.i18n("settings.load_agents") : "Carregar Agentes";
+            $button.prop("disabled", false).text(buttonText);
           });
       });
 
@@ -124,7 +112,7 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
           _this.hideValidationError();
         }
       });
-    }
+    } // <-- Add this closing brace for settings()
 
     /**
      * Show test connection result
@@ -137,6 +125,40 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
              .addClass(success ? "success" : "error")
              .text(message)
              .fadeIn(300);
+    }
+
+    /**
+     * Show a non-blocking notification message
+     * @param {string} message - Notification message
+     * @param {string} type - Notification type: "success" or "error"
+     */
+    showNotification(message, type = "success") {
+      let $notif = $("#kommo-n8n-notification");
+      if ($notif.length === 0) {
+        $notif = $('<div id="kommo-n8n-notification"></div>').appendTo("body");
+        $notif.css({
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          zIndex: 9999,
+          minWidth: "220px",
+          padding: "12px 20px",
+          borderRadius: "6px",
+          fontSize: "15px",
+          color: "#fff",
+          display: "none"
+        });
+      }
+      $notif
+        .removeClass("success error")
+        .addClass(type)
+        .css("background", type === "success" ? "#28a745" : "#dc3545")
+        .text(message)
+        .fadeIn(200);
+
+      setTimeout(() => {
+        $notif.fadeOut(400);
+      }, 3000);
     }
 
     /**
