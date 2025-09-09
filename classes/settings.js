@@ -36,8 +36,11 @@ define([], function () {
         }
 
         if (isActive) {
+          console.log("Validating params:", params);
+          
           if (!_this.widget.validateSettings(params)) {
             console.log("Validation failed for params:", params);
+            
             // Trigger save error if validation fails
             $(".modal." + code)
               .find(".js-widget-save")
@@ -47,6 +50,7 @@ define([], function () {
             reject(new Error("Validation failed"));
             return;
           } else {
+            console.log("Validation passed, configuring webhook...");
             // Configure n8n webhook before saving
             _this.widget.kommo.configureN8nWebhook(
               params.webhook_url,

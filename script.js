@@ -98,25 +98,54 @@ define([
       
       if (!params || typeof params !== 'object') {
         console.log("Params is not an object:", params);
+        _this.showValidationError("Parâmetros inválidos");
         return false;
       }
 
-      if (!params.webhook_url || !params.openai_key || !params.selected_agent) {
-        console.log("Missing required fields:", {
-          webhook_url: !!params.webhook_url,
-          openai_key: !!params.openai_key,
-          selected_agent: !!params.selected_agent
-        });
+      // Check webhook URL
+      if (!params.webhook_url || params.webhook_url.trim() === '') {
+        console.log("Missing webhook URL");
+        _this.showValidationError("URL do webhook é obrigatória");
+        return false;
+      }
+
+      // Check OpenAI key
+      if (!params.openai_key || params.openai_key.trim() === '') {
+        console.log("Missing OpenAI key");
+        _this.showValidationError("Chave da API OpenAI é obrigatória");
+        return false;
+      }
+
+      // Check selected agent
+      if (!params.selected_agent || params.selected_agent.trim() === '') {
+        console.log("Missing selected agent");
+        _this.showValidationError("Agente deve ser selecionado");
         return false;
       }
 
       // Validate webhook URL format
       if (!_this.kommo.validateWebhookUrl(params.webhook_url)) {
         console.log("Invalid webhook URL:", params.webhook_url);
+        _this.showValidationError("URL do webhook inválida");
         return false;
       }
 
       return true;
+    };
+
+    /**
+     * Show validation error message
+     */
+    _this.showValidationError = function (message) {
+      const $messages = $("#kommo-n8n-validation-messages");
+      const $error = $messages.find(".kommo-n8n__validation-error");
+      
+      $error.text(message);
+      $messages.show();
+      
+      setTimeout(function() {
+        $messages.fadeOut(300);
+      }, 5000);
     };
 
     _this.callbacks = {
@@ -195,6 +224,7 @@ define([
                     block: "webhook",
                     code: "url",
                     id: "kommo-n8n-webhook-url",
+                    name: "params[webhook_url]",
                     placeholder: _this.i18n("settings.webhook.placeholder"),
                     value: _this.getNested(_this.info.params, "webhook_url", ""),
                   }),
@@ -203,6 +233,7 @@ define([
                     block: "openai",
                     code: "key",
                     id: "kommo-n8n-openai-key",
+                    name: "params[openai_key]",
                     type: "password",
                     placeholder: _this.i18n("settings.openai_key.placeholder"),
                     value: _this.getNested(_this.info.params, "openai_key", ""),
@@ -212,13 +243,10 @@ define([
                     block: "agents",
                     code: "select",
                     id: "kommo-n8n-agents-select",
-                    // usa a lista já normalizada
+                    name: "params[selected_agent]",
                     items: _this.getNested(_this.info.params, "available_agents", []),
-                    // faz fallback caso tenha sido salvo no formato antigo
                     selected: _this.getNested(_this.info.params, "selected_agent",
                               _this.getNested(_this.info.params, "agents.select", "")),
-                    // 🔧 chave certa para bater com validateSettings()
-                    name: "params[selected_agent]",
                     placeholder: _this.i18n("settings.agents.placeholder"),
                   }),
 

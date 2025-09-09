@@ -7,51 +7,56 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
     settings() {
       let _this = this;
 
-      // Load agents button handler
-      $(document).on("click", "#kommo-n8n-load-agents", function(e) {
+      console.log("Registering settings event handlers");
+
+      // Load agents button click handler
+      $("#kommo-n8n-load-agents").on("click", function(e) {
         e.preventDefault();
-        console.log("Load agents button clicked");
 
-        const apiKey = $("#kommo-n8n-openai-key").val().trim();
-        console.log("API Key length:", apiKey ? apiKey.length : 0);
+        const $button = $(this);
+        const $select = $("#kommo-n8n-agents-select");
+        const $status = $("#kommo-n8n-agents-status");
+        const openaiKey = $("#kommo-n8n-openai-key").val();
 
-        if (!apiKey) {
-          _this.showNotification("Please enter your OpenAI API key first", "error");
+        if (!openaiKey || openaiKey.trim() === '') {
+          $status.removeClass("success").addClass("error")
+                 .text(_this.widget.i18n("settings.errors.no_openai_key"))
+                 .show();
           return;
         }
 
-        // Show loading state
-        const $button = $(this);
-        $button.prop("disabled", true).text("Carregando...");
+        $button.prop("disabled", true).text(_this.widget.i18n("settings.agents.loading"));
+        $status.removeClass("success error").text("Carregando agentes...").show();
 
-        console.log("Starting to load OpenAI agents...");
-
-        _this.widget.kommo.loadOpenAIAgents(apiKey)
+        _this.widget.kommo.loadOpenAIAgents(openaiKey)
           .then(function(agents) {
-            console.log("Agents loaded successfully:", agents);
-            
-            if (agents && agents.length > 0) {
-              // Update the select with agents
-              const $select = $("#kommo-n8n-agents-select");
-              $select.empty().append('<option value="">Selecione um agente...</option>');
-              
-              agents.forEach(function(agent) {
-                $select.append(`<option value="${agent.id}">${agent.name}</option>`);
-              });
-              // Store agents in widget params for later use
-              _this.widget.info.params.available_agents = agents;
-              
-              _this.showNotification("Agentes carregados com sucesso!", "success");
-            } else {
-              _this.showNotification("Nenhum agente encontrado", "warning");
-            }
+            console.log("Agents loaded:", agents);
+
+            // Clear existing options
+            $select.empty();
+            $select.append('<option value="">' + _this.widget.i18n("settings.agents.placeholder") + '</option>');
+
+            // Add new options
+            agents.forEach(function(agent) {
+              $select.append(`<option value="${agent.id}">${agent.name}</option>`);
+            });
+
+            // Save agents to widget params for later use
+            _this.widget.info.params = _this.widget.info.params || {};
+            _this.widget.info.params.available_agents = agents;
+
+            $status.removeClass("error").addClass("success")
+                   .text(`${agents.length} agentes carregados com sucesso!`)
+                   .show();
           })
           .catch(function(error) {
             console.error("Error loading agents:", error);
-            _this.showNotification("Erro ao carregar agentes: " + error.message, "error");
+            $status.removeClass("success").addClass("error")
+                   .text("Erro ao carregar agentes: " + error.message)
+                   .show();
           })
           .finally(function() {
-            $button.prop("disabled", false).text("Carregar Agentes");
+            $button.prop("disabled", false).text(_this.widget.i18n("settings.agents.load_button"));
           });
       });
 
@@ -182,7 +187,7 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
         const $resultDiv = $('<div id="kommo-n8n-template-result" class="template-result"></div>');
         $("#kommo-n8n-generate-template").after($resultDiv);
       }
-      
+
       $("#kommo-n8n-template-result").removeClass("success error")
                                      .addClass(success ? "success" : "error")
                                      .text(message)
