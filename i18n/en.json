@@ -58,25 +58,4 @@
       "processing": "Processing with AI..."
     }
   }
-}lly!",
-      "webhook_configured": "n8n webhook configured automatically",
-      "fill_required_fields": "Please fill all required fields",
-      "agents_loaded": "Agents loaded successfully!",
-      "no_agents_found": "No agents found",
-      "agent_load_error": "Error loading agents"
-    },
-    "errors": {
-      "webhook_required": "Webhook URL is required",
-      "agent_required": "Agent ID is required",
-      "invalid_webhook": "Invalid webhook URL format"
-    },
-    "widget_panel": {
-      "title": "AI Chatbot",
-      "status_active": "Chatbot is active and monitoring",
-      "status_inactive": "Chatbot is inactive",
-      "last_interaction": "Last interaction:",
-      "trigger_chat": "Trigger Chatbot",
-      "processing": "Processing with AI..."
-    }
-  }
 }
