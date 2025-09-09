@@ -181,6 +181,7 @@ define([
                   webhook: _this.templates.twig.input({
                     block: "webhook",
                     code: "url",
+                    id: "kommo-n8n-webhook-url",
                     placeholder: _this.i18n("settings.webhook.placeholder"),
                     value: _this.getNested(_this.info.params, "webhook_url", ""),
                   }),
@@ -188,6 +189,7 @@ define([
                   openai_key: _this.templates.twig.input({
                     block: "openai",
                     code: "key",
+                    id: "kommo-n8n-openai-key",
                     type: "password",
                     placeholder: _this.i18n("settings.openai_key.placeholder"),
                     value: _this.getNested(_this.info.params, "openai_key", ""),
@@ -196,6 +198,7 @@ define([
                   agents_select: _this.templates.twig.select({
                     block: "agents",
                     code: "select",
+                    id: "kommo-n8n-agents-select",
                     items: _this.getNested(_this.info.params, "available_agents", []),
                     selected: _this.getNested(_this.info.params, "selected_agent", ""),
                     placeholder: _this.i18n("settings.agents.placeholder"),
@@ -204,6 +207,7 @@ define([
                   load_agents_button: _this.templates.twig.button({
                     block: "load",
                     code: "agents",
+                    id: "kommo-n8n-load-agents",
                     text: _this.i18n("settings.agents.load_button"),
                     value: 1,
                   }),
@@ -211,6 +215,7 @@ define([
                   generate_template_button: _this.templates.twig.button({
                     block: "generate",
                     code: "template",
+                    id: "kommo-n8n-generate-template",
                     text: _this.i18n("settings.template_generation.button"),
                     value: 1,
                   }),
@@ -262,6 +267,8 @@ define([
                   ? _this.templates.twig.button({
                       block: "button",
                       code: "trigger",
+                      id: "kommo-n8n-button-trigger",
+                      class_name: "kommo-n8n__button-trigger",
                       text: _this.i18n("settings.widget_panel.trigger_chat"),
                       value: 1,
                     })
