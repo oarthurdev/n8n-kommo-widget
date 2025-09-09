@@ -31,6 +31,7 @@ define([], function () {
         let installed = ((_this.widget.params || {}).active || "N") === "Y";
         
 <<<<<<< HEAD
+<<<<<<< HEAD
         // Only validate if widget is being activated AND has configuration data
         if (isActive && installed) {
           console.log("Validating params for configured widget:", params);
@@ -38,6 +39,11 @@ define([], function () {
         if (isActive) {
           console.log("Validating params:", params);
 >>>>>>> 1b9ae0d (Assistant checkpoint: Fix form serialization and custom field handling)
+=======
+        // Only validate if widget is being activated AND has configuration data
+        if (isActive && installed) {
+          console.log("Validating params for configured widget:", params);
+>>>>>>> 39d8944 (Assistant checkpoint: Fix validation during widget installation)
           
           // Only validate if we have actual configuration data
           if (params && Object.keys(params).length > 0) {
@@ -50,12 +56,16 @@ define([], function () {
                 .trigger("button:save:error");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 39d8944 (Assistant checkpoint: Fix validation during widget installation)
               // Reject the promise due to validation error
               reject(new Error("Validation failed"));
               return;
             } else {
               console.log("Validation passed, saving configuration...");
             }
+<<<<<<< HEAD
 =======
             // Reject the promise due to validation error
             reject(new Error("Validation failed"));
@@ -74,6 +84,8 @@ define([], function () {
             resolve(data);
             return;
 >>>>>>> 1b9ae0d (Assistant checkpoint: Fix form serialization and custom field handling)
+=======
+>>>>>>> 39d8944 (Assistant checkpoint: Fix validation during widget installation)
           }
           
           // Add parameters to data after successful validation
@@ -90,10 +102,14 @@ define([], function () {
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         // For inactive widgets or installation, just set custom field without validation
 =======
         // For inactive widgets, still need to set custom field
 >>>>>>> 1b9ae0d (Assistant checkpoint: Fix form serialization and custom field handling)
+=======
+        // For inactive widgets or installation, just set custom field without validation
+>>>>>>> 39d8944 (Assistant checkpoint: Fix validation during widget installation)
         evt.fields.custom = JSON.stringify(params);
         
         // Update widget info with new settings
