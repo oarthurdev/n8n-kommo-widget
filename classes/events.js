@@ -9,40 +9,59 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
       let _this = this;
 
       // Load agents button handler
-      $("#kommo-n8n-load-agents").on("click", function() {
-        const apiKey = $("#kommo-n8n-openai-key").val();
+      $(document).on("click", "#kommo-n8n-load-agents", function(e) {
+        e.preventDefault();
+        console.log("Load agents button clicked");
+        
+        const apiKey = $("#kommo-n8n-openai-key").val().trim();
+        console.log("API Key length:", apiKey ? apiKey.length : 0);
 
         if (!apiKey) {
-          alert("Please enter your OpenAI API key first");
+          alert("Por favor, insira sua chave API OpenAI primeiro");
           return;
         }
 
         // Show loading state
-        $(this).prop("disabled", true).text("Loading...");
+        const $button = $(this);
+        $button.prop("disabled", true).text("Carregando...");
+
+        console.log("Starting to load OpenAI agents...");
 
         _this.widget.kommo.loadOpenAIAgents(apiKey)
           .then(function(agents) {
+            console.log("Agents loaded successfully:", agents);
+            
             // Update agents select dropdown
             const $select = $("#kommo-n8n-agents-select");
             $select.empty();
-            $select.append('<option value="">Select an agent...</option>');
+            $select.append('<option value="">Selecione um agente...</option>');
             
-            agents.forEach(function(agent) {
-              $select.append(`<option value="${agent.id}">${agent.name}</option>`);
-            });
+            if (agents && agents.length > 0) {
+              agents.forEach(function(agent) {
+                $select.append(`<option value="${agent.id}">${agent.name}</option>`);
+              });
 
-            // Store agents in widget params
-            _this.widget.info.params = _this.widget.info.params || {};
-            _this.widget.info.params.available_agents = agents;
+              // Store agents in widget params
+              _this.widget.info.params = _this.widget.info.params || {};
+              _this.widget.info.params.available_agents = agents;
 
-            alert("Agents loaded successfully!");
+              alert(`Agentes carregados com sucesso! ${agents.length} agente(s) encontrado(s).`);
+            } else {
+              alert("Nenhum agente encontrado. Verifique sua chave API.");
+            }
           })
           .catch(function(error) {
-            alert("Failed to load agents. Please check your API key.");
-            console.error(error);
+            console.error("Error loading agents:", error);
+            let errorMsg = "Falha ao carregar agentes. ";
+            if (error.message) {
+              errorMsg += error.message;
+            } else {
+              errorMsg += "Verifique sua chave API OpenAI.";
+            }
+            alert(errorMsg);
           })
           .finally(function() {
-            $("#kommo-n8n-load-agents").prop("disabled", false).text(_this.widget.i18n("settings.agents.load_button"));
+            $button.prop("disabled", false).text("Carregar Agentes");
           });
       });
 

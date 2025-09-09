@@ -36,6 +36,42 @@
   cursor: not-allowed;
 }
 
+.kommo-n8n__agents-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.kommo-n8n__agents-select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.kommo-n8n__load-button {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: background-color 0.3s;
+}
+
+.kommo-n8n__load-button:hover {
+  background-color: #229954;
+}
+
+.kommo-n8n__load-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
 .kommo-test-result {
   padding: 10px;
   border-radius: 4px;
