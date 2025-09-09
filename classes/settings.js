@@ -30,37 +30,42 @@ define([], function () {
         // Check if already installed
         let installed = ((_this.widget.params || {}).active || "N") === "Y";
         
-        if (isActive) {
-          console.log("Validating params:", params);
+        // Only validate if widget is being activated AND has configuration data
+        if (isActive && installed) {
+          console.log("Validating params for configured widget:", params);
           
-          if (!_this.widget.validateSettings(params)) {
-            console.log("Validation failed for params:", params);
-            
-            // Trigger save error if validation fails
-            $(".modal." + code)
-              .find(".js-widget-save")
-              .trigger("button:save:error");
+          // Only validate if we have actual configuration data
+          if (params && Object.keys(params).length > 0) {
+            if (!_this.widget.validateSettings(params)) {
+              console.log("Validation failed for params:", params);
+              
+              // Trigger save error if validation fails
+              $(".modal." + code)
+                .find(".js-widget-save")
+                .trigger("button:save:error");
 
-            // Reject the promise due to validation error
-            reject(new Error("Validation failed"));
-            return;
-          } else {
-            console.log("Validation passed, saving configuration...");
-            // Add parameters to data after successful validation
-            data.params = params;
-            
-            // Update widget info with new settings
-            _this.widget.info = data;
-            
-            // CRITICAL: Set the custom field with serialized params
-            evt.fields.custom = JSON.stringify(params);
-            
-            resolve(data);
-            return;
+              // Reject the promise due to validation error
+              reject(new Error("Validation failed"));
+              return;
+            } else {
+              console.log("Validation passed, saving configuration...");
+            }
           }
+          
+          // Add parameters to data after successful validation
+          data.params = params;
+          
+          // Update widget info with new settings
+          _this.widget.info = data;
+          
+          // CRITICAL: Set the custom field with serialized params
+          evt.fields.custom = JSON.stringify(params);
+          
+          resolve(data);
+          return;
         }
 
-        // For inactive widgets, still need to set custom field
+        // For inactive widgets or installation, just set custom field without validation
         evt.fields.custom = JSON.stringify(params);
         
         // Update widget info with new settings
