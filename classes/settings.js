@@ -13,12 +13,11 @@ define([], function () {
       let _this = this;
       let code = _this.widget.params.widget_code;
       let isActive = false;
-      let params =
-        (
-          $(
-            "#" + _this.widget.config.prefix + "-settings__form"
-          ).serializeJSON() || {}
-        ).params || {};
+      let formData = $("#" + _this.widget.config.prefix + "-settings__form").serializeJSON() || {};
+      let params = formData.params || {};
+      
+      console.log("Form data:", formData);
+      console.log("Extracted params:", params);
 
       return new Promise(function (resolve, reject) {
         // Determine if the widget is active
@@ -30,11 +29,7 @@ define([], function () {
 
         // Check if already installed
         let installed = ((_this.widget.params || {}).active || "N") === "Y";
-        // Resolve with an indication to reinstall if not installed
-        if (!installed) {
-          resolve({ reinstall: true });
-        }
-
+        
         if (isActive) {
           console.log("Validating params:", params);
           
@@ -53,19 +48,30 @@ define([], function () {
             console.log("Validation passed, saving configuration...");
             // Add parameters to data after successful validation
             data.params = params;
+            
+            // Update widget info with new settings
+            _this.widget.info = data;
+            
+            // CRITICAL: Set the custom field with serialized params
+            evt.fields.custom = JSON.stringify(params);
+            
             resolve(data);
             return;
           }
         }
 
+        // For inactive widgets, still need to set custom field
+        evt.fields.custom = JSON.stringify(params);
+        
         // Update widget info with new settings
         _this.widget.info = data;
-        // Update custom fields
-        evt.fields.custom = JSON.stringify(params);
         resolve(data);
-      }).then(function () {
-        // Return true after successful save
+      }).then(function (result) {
+        console.log("Settings saved successfully:", result);
         return true;
+      }).catch(function (error) {
+        console.error("Error saving settings:", error);
+        throw error;
       });
     }
 
