@@ -13,7 +13,7 @@ define(["./http.js"], function (Http) {
     getAccount() {
       return this.http.request(
         "/api/v4/account",
-        { with: "users" },
+        {},
         "GET",
         {
           cache: { key: "n8n_account", expires: 60 },
@@ -191,9 +191,17 @@ define(["./http.js"], function (Http) {
      * @returns {Promise} - A promise that resolves with users array
      */
     getUsers() {
-      return this.getAccount().then(function(account) {
-        const users = ((account || {})._embedded || {}).users || [];
-        return users.filter(user => user.rights.is_active).map(user => ({
+      return this.http.request(
+        "/api/v4/users",
+        {},
+        "GET",
+        {
+          cache: { key: "n8n_users", expires: 300 },
+          baseURL: window.location.origin,
+        }
+      ).then(function(response) {
+        const users = ((response || {})._embedded || {}).users || [];
+        return users.filter(user => user.rights && user.rights.is_active).map(user => ({
           id: user.id,
           option: user.name,
           name: user.name
