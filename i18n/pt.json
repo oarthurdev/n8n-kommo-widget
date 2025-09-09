@@ -39,6 +39,29 @@
     "notifications": {
       "config_saved": "Configuração salva com sucesso!",
       "webhook_configured": "Webhook n8n configurado automaticamente",
+      "fill_required_fields": "Por favor, preencha todos os campos obrigatórios",
+      "agents_loaded": "Agentes carregados com sucesso!",
+      "no_agents_found": "Nenhum agente encontrado",
+      "agent_load_error": "Erro ao carregar agentes"
+    },
+    "errors": {
+      "webhook_required": "URL do webhook é obrigatória",
+      "agent_required": "ID do agente é obrigatório",
+      "invalid_webhook": "Formato da URL do webhook inválido"
+    },
+    "widget_panel": {
+      "title": "Chatbot IA",
+      "status_active": "Chatbot está ativo e monitorando",
+      "status_inactive": "Chatbot está inativo",
+      "last_interaction": "Última interação:",
+      "trigger_chat": "Acionar Chatbot",
+      "processing": "Processando com IA..."
+    }
+  }
+}
+    "notifications": {
+      "config_saved": "Configuração salva com sucesso!",
+      "webhook_configured": "Webhook n8n configurado automaticamente",
       "fill_required_fields": "Preencha todos os campos obrigatórios",
       "agents_loaded": "Agentes carregados com sucesso!",
       "no_agents_found": "Nenhum agente encontrado",

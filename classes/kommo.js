@@ -193,7 +193,7 @@ define(["./http.js"], function (Http) {
      */
     loadOpenAIAgents(apiKey) {
       console.log("Loading OpenAI agents with API key...");
-      
+
       return fetch('https://api.openai.com/v1/assistants', {
         method: 'GET',
         headers: {
@@ -204,31 +204,31 @@ define(["./http.js"], function (Http) {
       })
       .then(response => {
         console.log("OpenAI API response status:", response.status);
-        
+
         if (!response.ok) {
           throw new Error(`OpenAI API error: ${response.status} - ${response.statusText}`);
         }
-        
+
         return response.json();
       })
       .then(data => {
         console.log("OpenAI API response data:", data);
-        
+
         if (data.error) {
           throw new Error(`OpenAI API error: ${data.error.message || data.error.type}`);
         }
-        
+
         if (data.data && Array.isArray(data.data)) {
           const agents = data.data.map(agent => ({
             id: agent.id,
             name: agent.name || agent.id,
             option: agent.name || agent.id
           }));
-          
+
           console.log("Processed agents:", agents);
           return agents;
         }
-        
+
         console.warn("No agents found in response");
         return [];
       })
@@ -387,7 +387,7 @@ define(["./http.js"], function (Http) {
     validateWebhookUrl(url) {
       try {
         const urlObj = new URL(url);
-        return urlObj.protocol === 'https:' && urlObj.hostname.length > 0;
+        return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
       } catch (e) {
         return false;
       }

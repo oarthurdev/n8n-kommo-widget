@@ -94,12 +94,25 @@ define([
      * Validates n8n chatbot settings
      */
     _this.validateSettings = function (params) {
+      console.log("Validating settings:", params);
+      
+      if (!params || typeof params !== 'object') {
+        console.log("Params is not an object:", params);
+        return false;
+      }
+
       if (!params.webhook_url || !params.openai_key || !params.selected_agent) {
+        console.log("Missing required fields:", {
+          webhook_url: !!params.webhook_url,
+          openai_key: !!params.openai_key,
+          selected_agent: !!params.selected_agent
+        });
         return false;
       }
 
       // Validate webhook URL format
       if (!_this.kommo.validateWebhookUrl(params.webhook_url)) {
+        console.log("Invalid webhook URL:", params.webhook_url);
         return false;
       }
 

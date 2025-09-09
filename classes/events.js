@@ -55,6 +55,40 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
           });
       });
 
+      // Generate template button handler
+      $(document).on("click", "#kommo-n8n-generate-template", function(e) {
+        e.preventDefault();
+        console.log("Generate template button clicked");
+
+        const webhookUrl = $("#kommo-n8n-webhook-url").val().trim();
+        const openaiKey = $("#kommo-n8n-openai-key").val().trim();
+        const selectedAgent = $("#kommo-n8n-agents-select").val();
+
+        if (!webhookUrl || !openaiKey || !selectedAgent) {
+          _this.showNotification("Por favor, preencha todos os campos antes de gerar o template", "error");
+          return;
+        }
+
+        const $button = $(this);
+        $button.prop("disabled", true).text("Gerando...");
+
+        try {
+          const config = {
+            webhook_url: webhookUrl,
+            openai_key: openaiKey,
+            selected_agent: selectedAgent
+          };
+
+          _this.widget.kommo.generateSalesbotTemplate(config);
+          _this.showNotification("Template gerado e baixado com sucesso!", "success");
+        } catch (error) {
+          console.error("Error generating template:", error);
+          _this.showNotification("Erro ao gerar template: " + error.message, "error");
+        } finally {
+          $button.prop("disabled", false).text(_this.widget.i18n("settings.template_generation.button"));
+        }
+      });
+
       // Copy template button handler
       $("#kommo-n8n-copy-template").on("click", function() {
         const textarea = document.getElementById("kommo-n8n-template-json");
