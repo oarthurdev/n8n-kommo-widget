@@ -50,23 +50,10 @@ define([], function () {
             reject(new Error("Validation failed"));
             return;
           } else {
-            console.log("Validation passed, configuring webhook...");
-            // Configure n8n webhook before saving
-            _this.widget.kommo.configureN8nWebhook(
-              params.webhook_url,
-              params.openai_key,
-              params.selected_agent
-            ).then(function(response) {
-              console.log("n8n webhook configured successfully:", response);
-              // Add parameters to data after successful configuration
-              data.params = params;
-              resolve(data);
-            }).catch(function(error) {
-              console.warn("Failed to configure n8n webhook:", error);
-              // Continue with save even if webhook configuration fails
-              data.params = params;
-              resolve(data);
-            });
+            console.log("Validation passed, saving configuration...");
+            // Add parameters to data after successful validation
+            data.params = params;
+            resolve(data);
             return;
           }
         }

@@ -23,24 +23,31 @@ define(["./http.js"], function (Http) {
     }
 
     /**
-     * Send data to n8n webhook
+     * Send data to n8n webhook with multi-company configuration
      * @param {string} webhookUrl - The n8n webhook URL
      * @param {Object} payload - Data to send to n8n
-     * @param {string} authToken - Authentication token
+     * @param {Object} config - Company configuration (OpenAI key, agent, etc.)
      * @returns {Promise} - A promise that resolves with the webhook response
      */
-    sendToN8nWebhook(webhookUrl, payload, authToken = null) {
+    sendToN8nWebhook(webhookUrl, payload, config = {}) {
       let headers = {
         'Content-Type': 'application/json'
       };
 
-      if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
-      }
+      // Add company configuration to payload for multi-company support
+      const enhancedPayload = {
+        ...payload,
+        company_config: {
+          openai_api_key: config.openai_key || '',
+          agent_id: config.agent_id || config.selected_agent || '',
+          kommo_account: APP.widgets.system.subdomain || '',
+          webhook_url: webhookUrl
+        }
+      };
 
       return this.http.request(
         "",
-        JSON.stringify(payload),
+        JSON.stringify(enhancedPayload),
         "POST",
         {
           baseURL: webhookUrl,
@@ -52,20 +59,18 @@ define(["./http.js"], function (Http) {
     /**
      * Test n8n webhook connection
      * @param {string} webhookUrl - The n8n webhook URL
-     * @param {string} agentId - OpenAI agent ID
-     * @param {string} authToken - Authentication token
+     * @param {Object} config - Company configuration
      * @returns {Promise} - A promise that resolves with test results
      */
-    testN8nConnection(webhookUrl, agentId, authToken = null) {
+    testN8nConnection(webhookUrl, config) {
       const testPayload = {
         test: true,
-        agent_id: agentId,
         message: "Test connection from Kommo",
         timestamp: new Date().toISOString(),
         source: "kommo_widget_test"
       };
 
-      return this.sendToN8nWebhook(webhookUrl, testPayload, authToken);
+      return this.sendToN8nWebhook(webhookUrl, testPayload, config);
     }
 
     /**
@@ -155,18 +160,19 @@ define(["./http.js"], function (Http) {
      */
     processChatbotInteraction(config, entityData, trigger = 'manual') {
       const payload = {
-        agent_id: config.agent_id,
         entity_data: entityData,
         trigger: trigger,
         timestamp: new Date().toISOString(),
-        kommo_account: APP.widgets.system.subdomain,
         source: "kommo_widget"
       };
 
       return this.sendToN8nWebhook(
         config.webhook_url,
         payload,
-        config.api_key
+        {
+          openai_key: config.openai_key,
+          agent_id: config.agent_id || config.selected_agent
+        }
       );
     }
 
@@ -238,34 +244,7 @@ define(["./http.js"], function (Http) {
       });
     }
 
-    /**
-     * Configure n8n webhook with OpenAI credentials and agent
-     * @param {string} webhookUrl - The n8n webhook URL
-     * @param {string} openaiKey - OpenAI API key
-     * @param {string} agentId - Selected OpenAI agent ID
-     * @returns {Promise} - A promise that resolves with configuration response
-     */
-    configureN8nWebhook(webhookUrl, openaiKey, agentId) {
-      const configPayload = {
-        action: "configure",
-        openai_api_key: openaiKey,
-        agent_id: agentId,
-        timestamp: new Date().toISOString(),
-        source: "kommo_widget_config"
-      };
-
-      return this.http.request(
-        "/configure",
-        JSON.stringify(configPayload),
-        "POST",
-        {
-          baseURL: webhookUrl,
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
+    
 
     /**
      * Generate template.json for Salesbot

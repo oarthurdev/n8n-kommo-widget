@@ -60,6 +60,42 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
           });
       });
 
+      // Test connection button handler
+      $(document).on("click", "#kommo-n8n-test-connection", function(e) {
+        e.preventDefault();
+        console.log("Test connection button clicked");
+
+        const webhookUrl = $("#kommo-n8n-webhook-url").val().trim();
+        const openaiKey = $("#kommo-n8n-openai-key").val().trim();
+        const selectedAgent = $("#kommo-n8n-agents-select").val();
+
+        if (!webhookUrl || !openaiKey || !selectedAgent) {
+          _this.showNotification("Por favor, preencha todos os campos antes de testar", "error");
+          return;
+        }
+
+        const $button = $(this);
+        $button.prop("disabled", true).text("Testando...");
+
+        const config = {
+          openai_key: openaiKey,
+          selected_agent: selectedAgent
+        };
+
+        _this.widget.kommo.testN8nConnection(webhookUrl, config)
+          .then(function(response) {
+            console.log("Test successful:", response);
+            _this.showNotification("Conexão testada com sucesso!", "success");
+          })
+          .catch(function(error) {
+            console.error("Test failed:", error);
+            _this.showNotification("Erro ao testar conexão: " + error.message, "error");
+          })
+          .finally(function() {
+            $button.prop("disabled", false).text("Testar Conexão");
+          });
+      });
+
       // Generate template button handler
       $(document).on("click", "#kommo-n8n-generate-template", function(e) {
         e.preventDefault();
@@ -84,7 +120,11 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
             selected_agent: selectedAgent
           };
 
-          _this.widget.kommo.generateSalesbotTemplate(config);
+          const template = _this.widget.kommo.generateSalesbotTemplate(config);
+          const templateJson = JSON.stringify(template, null, 2);
+          const filename = `kommo_n8n_template_${new Date().getTime()}.json`;
+          
+          _this.widget.kommo.downloadFile(filename, templateJson, 'application/json');
           _this.showNotification("Template gerado e baixado com sucesso!", "success");
         } catch (error) {
           console.error("Error generating template:", error);

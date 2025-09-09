@@ -283,3 +283,33 @@ input.error, select.error {
   border-color: #e74c3c !important;
   box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
 }
+
+.kommo-n8n__button--primary:hover {
+  background-color: #0056b3;
+}
+
+.kommo-n8n__button--test {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.kommo-n8n__button--test:hover {
+  background-color: #218838;
+}
+
+.kommo-n8n__button--test:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.kommo-n8n__test-connection {
+  margin-top: 15px;
+  padding: 15px 0;
+  border-top: 1px solid #e9ecef;
+}
