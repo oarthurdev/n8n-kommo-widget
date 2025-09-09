@@ -18,54 +18,23 @@
       "desc": "Enter your n8n workflow webhook URL",
       "placeholder": "https://your-n8n-instance.com/webhook/chatbot"
     },
-    "agent": {
-      "title": "OpenAI Agent ID",
-      "desc": "Your company's unique OpenAI agent identifier",
-      "placeholder": "agent_12345_company_name"
+    "openai_key": {
+      "title": "OpenAI API Key",
+      "desc": "Your OpenAI API Key for accessing agents",
+      "placeholder": "sk-..."
     },
-    "api_key": {
-      "title": "Authentication Token",
-      "desc": "Security token for webhook authentication",
-      "placeholder": "Enter your authentication token"
+    "agents": {
+      "title": "Select Agent",
+      "desc": "Choose the OpenAI agent to use for this integration",
+      "placeholder": "Select an agent...",
+      "load_button": "Load Agents"
     },
-    "trigger_conditions": {
-      "title": "Trigger Conditions",
-      "desc": "When should the chatbot be activated?"
-    },
-    "entity": {
-      "title": "Entity Type",
-      "desc": "Which type of records should trigger the chatbot",
-      "options": {
-        "contact": "Contacts",
-        "lead": "Leads",
-        "both": "Contacts and Leads"
-      }
-    },
-    "events": {
-      "title": "Trigger Events",
-      "desc": "Select which events should activate the chatbot",
-      "options": {
-        "created": "New record created",
-        "updated": "Record updated",
-        "status_changed": "Status changed",
-        "note_added": "Note added"
-      }
-    },
-    "test": {
-      "title": "Test Integration",
-      "desc": "Test your n8n workflow connection",
-      "button": "Test Connection",
-      "success": "✅ Connection successful! Your chatbot is ready.",
-      "error": "❌ Connection failed. Please check your settings."
-    },
-    "response_handling": {
-      "title": "Response Handling",
-      "desc": "How should chatbot responses be handled in Kommo?",
-      "options": {
-        "note": "Add as note",
-        "task": "Create task",
-        "both": "Note and task"
-      }
+    "template_generation": {
+      "title": "Salesbot Template",
+      "desc": "Generate template.json for Kommo Salesbot integration",
+      "button": "Generate Template",
+      "success": "✅ Template generated successfully!",
+      "error": "❌ Failed to generate template."
     },
     "errors": {
       "webhook_required": "Webhook URL is required",

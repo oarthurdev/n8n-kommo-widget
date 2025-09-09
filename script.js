@@ -94,7 +94,7 @@ define([
      * Validates n8n chatbot settings
      */
     _this.validateSettings = function (params) {
-      if (!params.webhook_url || !params.agent_id) {
+      if (!params.webhook_url || !params.openai_key || !params.selected_agent) {
         return false;
       }
 
@@ -185,98 +185,33 @@ define([
                     value: _this.getNested(_this.info.params, "webhook_url", ""),
                   }),
 
-                  agent: _this.templates.twig.input({
-                    block: "agent",
-                    code: "id",
-                    placeholder: _this.i18n("settings.agent.placeholder"),
-                    value: _this.getNested(_this.info.params, "agent_id", ""),
-                  }),
-
-                  api_key: _this.templates.twig.input({
-                    block: "api",
+                  openai_key: _this.templates.twig.input({
+                    block: "openai",
                     code: "key",
                     type: "password",
-                    placeholder: _this.i18n("settings.api_key.placeholder"),
-                    value: _this.getNested(_this.info.params, "api_key", ""),
+                    placeholder: _this.i18n("settings.openai_key.placeholder"),
+                    value: _this.getNested(_this.info.params, "openai_key", ""),
                   }),
 
-                  entity: _this.templates.twig.select({
-                    block: "entity",
-                    code: "type",
-                    items: [
-                      {
-                        id: "contacts",
-                        option: _this.i18n("settings.entity.options.contact"),
-                      },
-                      {
-                        id: "leads",
-                        option: _this.i18n("settings.entity.options.lead"),
-                      },
-                      {
-                        id: "both",
-                        option: _this.i18n("settings.entity.options.both"),
-                      },
-                    ],
-                    selected: _this.getNested(_this.info.params, "entity_type", "both"),
+                  agents_select: _this.templates.twig.select({
+                    block: "agents",
+                    code: "select",
+                    items: _this.getNested(_this.info.params, "available_agents", []),
+                    selected: _this.getNested(_this.info.params, "selected_agent", ""),
+                    placeholder: _this.i18n("settings.agents.placeholder"),
                   }),
 
-                  events: _this.templates.twig.dropdown({
-                    block: "events",
-                    code: "trigger",
-                    title_empty: _this.i18n("settings.events.desc"),
-                    name_is_array: true,
-                    items: [
-                      {
-                        id: "created",
-                        name: "params[events][created]",
-                        option: _this.i18n("settings.events.options.created"),
-                        is_checked: !!_this.getNested(_this.info.params, "events.created", false),
-                      },
-                      {
-                        id: "updated", 
-                        name: "params[events][updated]",
-                        option: _this.i18n("settings.events.options.updated"),
-                        is_checked: !!_this.getNested(_this.info.params, "events.updated", false),
-                      },
-                      {
-                        id: "status_changed",
-                        name: "params[events][status_changed]",
-                        option: _this.i18n("settings.events.options.status_changed"),
-                        is_checked: !!_this.getNested(_this.info.params, "events.status_changed", false),
-                      },
-                      {
-                        id: "note_added",
-                        name: "params[events][note_added]",
-                        option: _this.i18n("settings.events.options.note_added"),
-                        is_checked: !!_this.getNested(_this.info.params, "events.note_added", false),
-                      },
-                    ],
+                  load_agents_button: _this.templates.twig.button({
+                    block: "load",
+                    code: "agents",
+                    text: _this.i18n("settings.agents.load_button"),
+                    value: 1,
                   }),
 
-                  response_handling: _this.templates.twig.select({
-                    block: "response",
-                    code: "handling",
-                    items: [
-                      {
-                        id: "note",
-                        option: _this.i18n("settings.response_handling.options.note"),
-                      },
-                      {
-                        id: "task",
-                        option: _this.i18n("settings.response_handling.options.task"),
-                      },
-                      {
-                        id: "both",
-                        option: _this.i18n("settings.response_handling.options.both"),
-                      },
-                    ],
-                    selected: _this.getNested(_this.info.params, "response_handling", "note"),
-                  }),
-
-                  test_button: _this.templates.twig.button({
-                    block: "test",
-                    code: "button",
-                    text: _this.i18n("settings.test.button"),
+                  generate_template_button: _this.templates.twig.button({
+                    block: "generate",
+                    code: "template",
+                    text: _this.i18n("settings.template_generation.button"),
                     value: 1,
                   }),
                 })

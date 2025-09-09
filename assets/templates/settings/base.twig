@@ -20,68 +20,64 @@
 
       <div class="kommo-settings__content">
         <!-- Webhook URL Configuration -->
-        <div class="kommo-settings__content__title">
-          <h4 class="kommo-h4--settings">{{ langs.webhook.title }}</h4>
-          <p class="kommo-p--settings">{{ langs.webhook.desc }}</p>
-        </div>
-        <div class="kommo-settings__content__value">
-          {{ webhook }}
-        </div>
+        <div class="widget_settings_block__item_field widget_settings_block__item_field--input">
+      <div class="widget_settings_block__item_field__title">
+        {{ langs.webhook.title }}
+      </div>
+      <div class="widget_settings_block__item_field__input">
+        {{ webhook }}
+      </div>
+      <div class="widget_settings_block__item_field__descr">
+        {{ langs.webhook.desc }}
+      </div>
+    </div>
 
-        <!-- Agent ID Configuration -->
-        <div class="kommo-settings__content__title">
-          <h4 class="kommo-h4--settings">{{ langs.agent.title }}</h4>
-          <p class="kommo-p--settings">{{ langs.agent.desc }}</p>
-        </div>
-        <div class="kommo-settings__content__value">
-          {{ agent }}
-        </div>
+    <!-- API Key Configuration -->
+    <div class="widget_settings_block__item_field widget_settings_block__item_field--input">
+      <div class="widget_settings_block__item_field__title">
+        {{ langs.openai_key.title }}
+      </div>
+      <div class="widget_settings_block__item_field__input">
+        {{ openai_key }}
+      </div>
+      <div class="widget_settings_block__item_field__descr">
+        {{ langs.openai_key.desc }}
+      </div>
+    </div>
 
-        <!-- API Key Configuration -->
-        <div class="kommo-settings__content__title">
-          <h4 class="kommo-h4--settings">{{ langs.api_key.title }}</h4>
-          <p class="kommo-p--settings">{{ langs.api_key.desc }}</p>
+    <!-- Agent Selection -->
+    <div class="widget_settings_block__item_field widget_settings_block__item_field--select">
+      <div class="widget_settings_block__item_field__title">
+        {{ langs.agents.title }}
+      </div>
+      <div class="widget_settings_block__item_field__input">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          {{ agents_select }}
+          {{ load_agents_button }}
         </div>
-        <div class="kommo-settings__content__value">
-          {{ api_key }}
-        </div>
+      </div>
+      <div class="widget_settings_block__item_field__descr">
+        {{ langs.agents.desc }}
+      </div>
+    </div>
 
-        <!-- Entity Type Selection -->
-        <div class="kommo-settings__content__title">
-          <h4 class="kommo-h4--settings">{{ langs.entity.title }}</h4>
-          <p class="kommo-p--settings">{{ langs.entity.desc }}</p>
+    <!-- Template Generation -->
+    <div class="widget_settings_block__item_field widget_settings_block__item_field--button">
+      <div class="widget_settings_block__item_field__title">
+        {{ langs.template_generation.title }}
+      </div>
+      <div class="widget_settings_block__item_field__input">
+        {{ generate_template_button }}
+        <div id="kommo-n8n-template-result" class="kommo-test-result" style="display: none; margin-top: 10px;"></div>
+        <div id="kommo-n8n-template-output" style="display: none; margin-top: 10px;">
+          <textarea id="kommo-n8n-template-json" readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px;"></textarea>
+          <button id="kommo-n8n-copy-template" style="margin-top: 5px;">Copy Template</button>
         </div>
-        <div class="kommo-settings__content__value">
-          {{ entity }}
-        </div>
-
-        <!-- Trigger Events -->
-        <div class="kommo-settings__content__title">
-          <h4 class="kommo-h4--settings">{{ langs.events.title }}</h4>
-          <p class="kommo-p--settings">{{ langs.events.desc }}</p>
-        </div>
-        <div class="kommo-settings__content__value">
-          {{ events }}
-        </div>
-
-        <!-- Response Handling -->
-        <div class="kommo-settings__content__title">
-          <h4 class="kommo-h4--settings">{{ langs.response_handling.title }}</h4>
-          <p class="kommo-p--settings">{{ langs.response_handling.desc }}</p>
-        </div>
-        <div class="kommo-settings__content__value">
-          {{ response_handling }}
-        </div>
-
-        <!-- Test Integration -->
-        <div class="kommo-settings__content__title">
-          <h4 class="kommo-h4--settings">{{ langs.test.title }}</h4>
-          <p class="kommo-p--settings">{{ langs.test.desc }}</p>
-        </div>
-        <div class="kommo-settings__content__value">
-          {{ test_button }}
-          <div id="{{ prefix }}-test-result" class="kommo-test-result" style="display: none; margin-top: 10px;"></div>
-        </div>
+      </div>
+      <div class="widget_settings_block__item_field__descr">
+        {{ langs.template_generation.desc }}
+      </div>
+    </div>
       </div>
     </form>
   {% endif %}

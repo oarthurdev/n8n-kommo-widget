@@ -187,6 +187,79 @@ define(["./http.js"], function (Http) {
     }
 
     /**
+     * Load OpenAI agents using the API key
+     * @param {string} apiKey - OpenAI API key
+     * @returns {Promise} - A promise that resolves with agents list
+     */
+    loadOpenAIAgents(apiKey) {
+      return fetch('https://api.openai.com/v1/assistants', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'OpenAI-Beta': 'assistants=v2'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.data) {
+          return data.data.map(agent => ({
+            id: agent.id,
+            option: agent.name || agent.id,
+            name: agent.name || agent.id
+          }));
+        }
+        throw new Error('Failed to load agents');
+      });
+    }
+
+    /**
+     * Generate template.json for Salesbot
+     * @param {Object} config - Widget configuration
+     * @returns {Object} - Template JSON object
+     */
+    generateSalesbotTemplate(config) {
+      const template = {
+        "name": "n8n Chatbot Integration",
+        "description": "Automated chatbot integration using n8n workflow and OpenAI agents",
+        "version": "1.0.0",
+        "triggers": [
+          {
+            "type": "webhook",
+            "webhook_url": config.webhook_url,
+            "method": "POST",
+            "headers": {
+              "Content-Type": "application/json"
+            }
+          }
+        ],
+        "actions": [
+          {
+            "type": "send_message",
+            "agent_id": config.selected_agent,
+            "openai_key": config.openai_key,
+            "response_type": "note"
+          }
+        ],
+        "settings": {
+          "auto_response": true,
+          "entities": ["leads", "contacts"],
+          "events": ["status_changed", "note_added", "created"],
+          "webhook_url": config.webhook_url,
+          "agent_config": {
+            "id": config.selected_agent,
+            "provider": "openai",
+            "api_key": config.openai_key
+          }
+        },
+        "created_at": new Date().toISOString(),
+        "created_by": "kommo_n8n_widget"
+      };
+
+      return template;
+    }
+
+    /**
      * Get users for task assignment
      * @returns {Promise} - A promise that resolves with users array
      */

@@ -8,36 +8,81 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
     settings() {
       let _this = this;
 
-      // Test connection button handler
-      $("#kommo-n8n-test-button").on("click", function() {
-        const webhookUrl = $("#kommo-n8n-webhook-url").val();
-        const agentId = $("#kommo-n8n-agent-id").val();
-        const apiKey = $("#kommo-n8n-api-key").val();
+      // Load agents button handler
+      $("#kommo-n8n-load-agents").on("click", function() {
+        const apiKey = $("#kommo-n8n-openai-key").val();
 
-        if (!webhookUrl || !agentId) {
-          _this.showTestResult(false, _this.widget.i18n("settings.errors.webhook_required"));
-          return;
-        }
-
-        if (!_this.widget.kommo.validateWebhookUrl(webhookUrl)) {
-          _this.showTestResult(false, _this.widget.i18n("settings.errors.invalid_webhook"));
+        if (!apiKey) {
+          alert("Please enter your OpenAI API key first");
           return;
         }
 
         // Show loading state
-        $("#kommo-n8n-test-button").prop("disabled", true).text("Testing...");
-        $("#kommo-n8n-test-result").hide();
+        $(this).prop("disabled", true).text("Loading...");
 
-        _this.widget.kommo.testN8nConnection(webhookUrl, agentId, apiKey)
-          .then(function(response) {
-            _this.showTestResult(true, _this.widget.i18n("settings.test.success"));
+        _this.widget.kommo.loadOpenAIAgents(apiKey)
+          .then(function(agents) {
+            // Update agents select dropdown
+            const $select = $("#kommo-n8n-agents-select");
+            $select.empty();
+            $select.append('<option value="">Select an agent...</option>');
+            
+            agents.forEach(function(agent) {
+              $select.append(`<option value="${agent.id}">${agent.name}</option>`);
+            });
+
+            // Store agents in widget params
+            _this.widget.info.params = _this.widget.info.params || {};
+            _this.widget.info.params.available_agents = agents;
+
+            alert("Agents loaded successfully!");
           })
           .catch(function(error) {
-            _this.showTestResult(false, _this.widget.i18n("settings.test.error"));
+            alert("Failed to load agents. Please check your API key.");
+            console.error(error);
           })
           .finally(function() {
-            $("#kommo-n8n-test-button").prop("disabled", false).text(_this.widget.i18n("settings.test.button"));
+            $("#kommo-n8n-load-agents").prop("disabled", false).text(_this.widget.i18n("settings.agents.load_button"));
           });
+      });
+
+      // Generate template button handler
+      $("#kommo-n8n-generate-template").on("click", function() {
+        const config = {
+          webhook_url: $("#kommo-n8n-webhook-url").val(),
+          openai_key: $("#kommo-n8n-openai-key").val(),
+          selected_agent: $("#kommo-n8n-agents-select").val()
+        };
+
+        if (!config.webhook_url || !config.openai_key || !config.selected_agent) {
+          _this.showTemplateResult(false, "Please fill all required fields");
+          return;
+        }
+
+        try {
+          const template = _this.widget.kommo.generateSalesbotTemplate(config);
+          const templateJson = JSON.stringify(template, null, 2);
+          
+          $("#kommo-n8n-template-json").val(templateJson);
+          $("#kommo-n8n-template-output").show();
+          _this.showTemplateResult(true, _this.widget.i18n("settings.template_generation.success"));
+        } catch (error) {
+          _this.showTemplateResult(false, _this.widget.i18n("settings.template_generation.error"));
+          console.error(error);
+        }
+      });
+
+      // Copy template button handler
+      $("#kommo-n8n-copy-template").on("click", function() {
+        const textarea = document.getElementById("kommo-n8n-template-json");
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        
+        $(this).text("Copied!").prop("disabled", true);
+        setTimeout(function() {
+          $("#kommo-n8n-copy-template").text("Copy Template").prop("disabled", false);
+        }, 2000);
       });
 
       // Webhook URL validation on input
@@ -80,6 +125,19 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
      */
     hideValidationError() {
       // Implementation for hiding validation errors
+    }
+
+    /**
+     * Show template generation result
+     * @param {boolean} success - Whether generation was successful
+     * @param {string} message - Result message
+     */
+    showTemplateResult(success, message) {
+      const $result = $("#kommo-n8n-template-result");
+      $result.removeClass("success error")
+             .addClass(success ? "success" : "error")
+             .text(message)
+             .fadeIn(300);
     }
 
     /**
