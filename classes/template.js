@@ -261,15 +261,15 @@ define(["jquery", "lib/components/base/modal", "twigjs", "text"], function (
         select: (params) => {
           let block = params.block || "";
           let code = params.code || "";
-          let defaultParams = $.extend(
-            {
-              items: [],
-              class_name: prefix + "__" + block + "-" + code + " ",
-              id: prefix + "-" + block + "-" + code + "-id",
-              name: "params[" + block + "][" + code + "]",
-            },
-            params
-          );
+          let defaultParams = {
+            items: [],
+            class_name: prefix + "__" + block + "-" + code + " ",
+            id: params.id || (prefix + "-" + block + "-" + code + "-id"),
+            name: "params[" + block + "][" + code + "]",
+          };
+          
+          // Merge params but preserve custom id if provided
+          defaultParams = $.extend(defaultParams, params);
 
           return _this.widget.render(
             { ref: "/tmpl/controls/select.twig" },
@@ -279,17 +279,17 @@ define(["jquery", "lib/components/base/modal", "twigjs", "text"], function (
         input: (params) => {
           let block = params.block || "";
           let code = params.code || "";
-          let defaultParams = $.extend(
-            {
-              id: prefix + "-" + block + "-" + code + "-id",
-              class_name: prefix + "__" + block + "-" + code + " ",
-              name: "params[" + block + "][" + code + "]",
-              value: "",
-              type: "text",
-              placeholder: "",
-            },
-            params
-          );
+          let defaultParams = {
+            id: params.id || (prefix + "-" + block + "-" + code + "-id"),
+            class_name: prefix + "__" + block + "-" + code + " ",
+            name: "params[" + block + "][" + code + "]",
+            value: "",
+            type: "text",
+            placeholder: "",
+          };
+          
+          // Merge params but preserve custom id if provided
+          defaultParams = $.extend(defaultParams, params);
 
           return _this.widget.render(
             { ref: "/tmpl/controls/input.twig" },
@@ -318,15 +318,15 @@ define(["jquery", "lib/components/base/modal", "twigjs", "text"], function (
         button: (params) => {
           let block = params.block || "";
           let code = params.code || "";
-          let defaultParams = $.extend(
-            {
-              class_name: prefix + "__" + block + "-" + code + " ",
-              id: prefix + "-" + block + "-" + code + "-id",
-              name: "params[" + block + "][" + code + "]",
-              text: "",
-            },
-            params
-          );
+          let defaultParams = {
+            class_name: prefix + "__" + block + "-" + code + " ",
+            id: params.id || (prefix + "-" + block + "-" + code + "-id"),
+            name: "params[" + block + "][" + code + "]",
+            text: "",
+          };
+          
+          // Merge params but preserve custom id if provided
+          defaultParams = $.extend(defaultParams, params);
 
           return _this.widget.render(
             { ref: "/tmpl/controls/button.twig" },
