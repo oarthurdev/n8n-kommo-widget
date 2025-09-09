@@ -239,6 +239,35 @@ define(["./http.js"], function (Http) {
     }
 
     /**
+     * Configure n8n webhook with OpenAI credentials and agent
+     * @param {string} webhookUrl - The n8n webhook URL
+     * @param {string} openaiKey - OpenAI API key
+     * @param {string} agentId - Selected OpenAI agent ID
+     * @returns {Promise} - A promise that resolves with configuration response
+     */
+    configureN8nWebhook(webhookUrl, openaiKey, agentId) {
+      const configPayload = {
+        action: "configure",
+        openai_api_key: openaiKey,
+        agent_id: agentId,
+        timestamp: new Date().toISOString(),
+        source: "kommo_widget_config"
+      };
+
+      return this.http.request(
+        "/configure",
+        JSON.stringify(configPayload),
+        "POST",
+        {
+          baseURL: webhookUrl,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+
+    /**
      * Generate template.json for Salesbot
      * @param {Object} config - Widget configuration
      * @returns {Object} - Template JSON object
@@ -248,40 +277,83 @@ define(["./http.js"], function (Http) {
         "name": "n8n Chatbot Integration",
         "description": "Automated chatbot integration using n8n workflow and OpenAI agents",
         "version": "1.0.0",
-        "triggers": [
-          {
-            "type": "webhook",
-            "webhook_url": config.webhook_url,
-            "method": "POST",
-            "headers": {
-              "Content-Type": "application/json"
-            }
-          }
-        ],
-        "actions": [
-          {
-            "type": "send_message",
-            "agent_id": config.selected_agent,
-            "openai_key": config.openai_key,
-            "response_type": "note"
-          }
-        ],
+        "script": "return true;",
         "settings": {
-          "auto_response": true,
-          "entities": ["leads", "contacts"],
-          "events": ["status_changed", "note_added", "created"],
-          "webhook_url": config.webhook_url,
-          "agent_config": {
-            "id": config.selected_agent,
-            "provider": "openai",
-            "api_key": config.openai_key
-          }
+          "login": config.webhook_url,
+          "password": "",
+          "responsible_user_id": null,
+          "creation_enabled": true,
+          "chat_template": {
+            "name": "n8n AI Assistant",
+            "welcome_message": "Olá! Sou seu assistente IA integrado via n8n. Como posso ajudá-lo?",
+            "fallback_message": "Desculpe, não consegui processar sua mensagem. Tente novamente.",
+            "agent_config": {
+              "openai_key": config.openai_key,
+              "agent_id": config.selected_agent,
+              "webhook_url": config.webhook_url
+            }
+          },
+          "triggers": [
+            {
+              "type": "entity_created",
+              "entities": ["leads", "contacts"]
+            },
+            {
+              "type": "entity_updated", 
+              "entities": ["leads", "contacts"]
+            },
+            {
+              "type": "note_added",
+              "entities": ["leads", "contacts"]
+            }
+          ],
+          "actions": [
+            {
+              "type": "webhook_call",
+              "url": config.webhook_url,
+              "method": "POST",
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body_template": {
+                "agent_id": config.selected_agent,
+                "entity_data": "{{entity}}",
+                "trigger": "{{trigger_type}}",
+                "timestamp": "{{timestamp}}",
+                "kommo_account": "{{account}}",
+                "source": "kommo_salesbot"
+              }
+            }
+          ]
         },
         "created_at": new Date().toISOString(),
-        "created_by": "kommo_n8n_widget"
+        "created_by": "kommo_n8n_widget",
+        "widget_config": {
+          "webhook_url": config.webhook_url,
+          "openai_key": config.openai_key,
+          "agent_id": config.selected_agent
+        }
       };
 
       return template;
+    }
+
+    /**
+     * Download file helper
+     * @param {string} filename - Name of file to download
+     * @param {string} content - File content
+     * @param {string} contentType - MIME type
+     */
+    downloadFile(filename, content, contentType = 'application/json') {
+      const blob = new Blob([content], { type: contentType });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
     }
 
     /**

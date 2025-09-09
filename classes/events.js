@@ -26,6 +26,64 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
 
         console.log("Starting to load OpenAI agents...");
 
+        _this.widget.kommo.loadOpenAIAgents(apiKey)
+          .then(function(agents) {
+            console.log("Agents loaded successfully:", agents);
+            
+            if (agents && agents.length > 0) {
+              // Update the select with agents
+              const $select = $("#kommo-n8n-agents-select");
+              $select.empty().append('<option value="">Selecione um agente...</option>');
+              
+              agents.forEach(function(agent) {
+                $select.append(`<option value="${agent.id}">${agent.name}</option>`);
+              });
+              
+              // Store agents in widget params for later use
+              _this.widget.info.params.available_agents = agents;
+              
+              _this.showNotification("Agentes carregados com sucesso!", "success");
+            } else {
+              _this.showNotification("Nenhum agente encontrado", "warning");
+            }
+          })
+          .catch(function(error) {
+            console.error("Error loading agents:", error);
+            _this.showNotification("Erro ao carregar agentes: " + error.message, "error");
+          })
+          .finally(function() {
+            $button.prop("disabled", false).text("Carregar Agentes");
+          });
+      });
+
+      // Generate template button handler
+      $(document).on("click", "#kommo-n8n-generate-template", function(e) {
+        e.preventDefault();
+        
+        const config = {
+          webhook_url: $("#kommo-n8n-webhook-url").val().trim(),
+          openai_key: $("#kommo-n8n-openai-key").val().trim(),
+          selected_agent: $("#kommo-n8n-agents-select").val()
+        };
+
+        if (!config.webhook_url || !config.openai_key || !config.selected_agent) {
+          _this.showNotification("Preencha todos os campos obrigatórios", "error");
+          return;
+        }
+
+        try {
+          const template = _this.widget.kommo.generateSalesbotTemplate(config);
+          const templateJson = JSON.stringify(template, null, 2);
+          
+          // Download the template
+          _this.widget.kommo.downloadFile('salesbot_template.json', templateJson);
+          _this.showTemplateResult(true, "Template gerado e baixado com sucesso!");
+        } catch (error) {
+          console.error("Error generating template:", error);
+          _this.showTemplateResult(false, "Erro ao gerar template: " + error.message);
+        }
+      });
+
        _this.widget.kommo.loadOpenAIAgents(apiKey)
           .then(function(agents) {
             // Normaliza pro formato que o select.twig entende
@@ -188,16 +246,46 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
     }
 
     /**
+     * Show notification message
+     * @param {string} message - Notification message
+     * @param {string} type - Notification type (success, error, warning)
+     */
+    showNotification(message, type = 'info') {
+      // Create notification element if it doesn't exist
+      let $notification = $("#kommo-n8n-notification");
+      if ($notification.length === 0) {
+        $notification = $('<div id="kommo-n8n-notification" class="kommo-notification"></div>');
+        $('body').append($notification);
+      }
+
+      $notification.removeClass("success error warning info")
+                  .addClass(type)
+                  .text(message)
+                  .fadeIn(300);
+
+      // Auto hide after 5 seconds
+      setTimeout(function() {
+        $notification.fadeOut(300);
+      }, 5000);
+    }
+
+    /**
      * Show template generation result
      * @param {boolean} success - Whether generation was successful
      * @param {string} message - Result message
      */
     showTemplateResult(success, message) {
       const $result = $("#kommo-n8n-template-result");
-      $result.removeClass("success error")
-             .addClass(success ? "success" : "error")
-             .text(message)
-             .fadeIn(300);
+      if ($result.length === 0) {
+        // Create result element if it doesn't exist
+        const $resultDiv = $('<div id="kommo-n8n-template-result" class="template-result"></div>');
+        $("#kommo-n8n-generate-template").after($resultDiv);
+      }
+      
+      $("#kommo-n8n-template-result").removeClass("success error")
+                                     .addClass(success ? "success" : "error")
+                                     .text(message)
+                                     .fadeIn(300);
     }
 
     /**

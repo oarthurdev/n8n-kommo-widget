@@ -1,4 +1,3 @@
-
 .kommo-n8n__webhook-url,
 .kommo-n8n__agent-id,
 .kommo-n8n__api-key {
@@ -92,15 +91,62 @@
 }
 
 .kommo-n8n__right_panel__container {
-  background-color: #f8f9fa;
-  border-left: 4px solid #3498db;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin: 10px 0;
 }
 
-.kommo-n8n__right_panel__inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
+/* Notification styles */
+.kommo-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  z-index: 10000;
+  display: none;
+  max-width: 300px;
+}
+
+.kommo-notification.success {
+  background-color: #28a745;
+}
+
+.kommo-notification.error {
+  background-color: #dc3545;
+}
+
+.kommo-notification.warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.kommo-notification.info {
+  background-color: #17a2b8;
+}
+
+/* Template result styles */
+.template-result {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: none;
+}
+
+.template-result.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.template-result.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 
 .kommo-n8n__chatbot-status {
