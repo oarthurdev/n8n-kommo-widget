@@ -222,9 +222,11 @@ define([
                 })
               );
 
-              _this.events.settings();
               $("#kommo-settings").fadeIn(300);
               _this.loader.displaySaveBtn(_this.params.widget_code);
+              
+              // Register event handlers after template is rendered
+              _this.events.settings();
 
               return _this.loader.hide();
             }).catch(function (ex) {

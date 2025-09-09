@@ -1,4 +1,3 @@
-
 define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
   return class Events {
     constructor(widget) {
@@ -12,7 +11,7 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
       $(document).on("click", "#kommo-n8n-load-agents", function(e) {
         e.preventDefault();
         console.log("Load agents button clicked");
-        
+
         const apiKey = $("#kommo-n8n-openai-key").val().trim();
         console.log("API Key length:", apiKey ? apiKey.length : 0);
 
@@ -30,12 +29,12 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
         _this.widget.kommo.loadOpenAIAgents(apiKey)
           .then(function(agents) {
             console.log("Agents loaded successfully:", agents);
-            
+
             // Update agents select dropdown
             const $select = $("#kommo-n8n-agents-select");
             $select.empty();
             $select.append('<option value="">Selecione um agente...</option>');
-            
+
             if (agents && agents.length > 0) {
               agents.forEach(function(agent) {
                 $select.append(`<option value="${agent.id}">${agent.name}</option>`);
@@ -81,7 +80,7 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
         try {
           const template = _this.widget.kommo.generateSalesbotTemplate(config);
           const templateJson = JSON.stringify(template, null, 2);
-          
+
           $("#kommo-n8n-template-json").val(templateJson);
           $("#kommo-n8n-template-output").show();
           _this.showTemplateResult(true, _this.widget.i18n("settings.template_generation.success"));
@@ -97,7 +96,7 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
         textarea.select();
         textarea.setSelectionRange(0, 99999);
         document.execCommand("copy");
-        
+
         $(this).text("Copied!").prop("disabled", true);
         setTimeout(function() {
           $("#kommo-n8n-copy-template").text("Copy Template").prop("disabled", false);
@@ -279,11 +278,11 @@ define(["moment", "lib/components/base/modal"], function (Moment, Modal) {
           case 'note':
             promises.push(_this.widget.kommo.createChatbotNote(entityId, entityType, response.message));
             break;
-          
+
           case 'task':
             promises.push(_this.widget.kommo.createChatbotTask(entityId, entityType, response.message));
             break;
-          
+
           case 'both':
             promises.push(_this.widget.kommo.createChatbotNote(entityId, entityType, response.message));
             promises.push(_this.widget.kommo.createChatbotTask(entityId, entityType, response.message));
