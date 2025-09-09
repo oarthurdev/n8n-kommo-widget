@@ -37,17 +37,73 @@
 
 .kommo-n8n__agents-container {
   display: flex;
-  gap: 10px;
-  align-items: center;
+  gap: 12px;
+  align-items: stretch;
   width: 100%;
+  margin-top: 5px;
+}
+
+.kommo-n8n__agents-container .kommo-n8n__agents-select {
+  min-height: 44px;
+}
+
+.kommo-n8n__agents-container .kommo-n8n__load-button {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .kommo-n8n__agents-select {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
   font-size: 14px;
+  background-color: #fff;
+  color: #333;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.kommo-n8n__agents-select:hover {
+  border-color: #3498db;
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+}
+
+.kommo-n8n__agents-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.kommo-n8n__agents-select:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  border-color: #e9ecef;
+}
+
+.kommo-n8n__agents-select option {
+  padding: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.kommo-n8n__agents-select option:hover {
+  background-color: #f1f3f4;
+}
+
+.kommo-n8n__agents-select.error {
+  border-color: #e74c3c;
+  background-color: #ffeaea;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
 }
 
 .kommo-n8n__load-button {
